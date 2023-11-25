@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity,Dimensions,Platform } from 'react-native';
-import MapView, { Marker, AnimatedRegion } from 'react-native-maps';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import MapView, { AnimatedRegion, Marker } from 'react-native-maps';
 import MapViewDirections from "react-native-maps-directions";
-import { useState, useRef, useEffect} from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { locationPermission, getCurrentLocation } from '../Helperfuncton/Helperfun'
 import { MODAL } from './MODAL';
 import CustomBtn from './CustomBtn';
@@ -10,6 +10,7 @@ import { Google_API } from '../Constrains/GoogleApi'
 import * as geolib from 'geolib';
 import { COLOR } from '../Constrains/COLOR';
 import { ListPages } from './ListPages';
+
 
 const screen = Dimensions.get('window');
 const ASPECT_RATIO = screen.width / screen.height;
@@ -38,15 +39,22 @@ export const MapPage = (props) => {
             longitude: null,
             latitudeDelta: LATITUDE_DELTA,
             longitudeDelta: LONGITUDE_DELTA,
-        }
+        },
+        coordinate: new AnimatedRegion({
+            latitude: 22.332671112167628,
+            longitude: 91.84030073971839,
+            latitudeDelta: LATITUDE_DELTA,
+            longitudeDelta: LONGITUDE_DELTA,
+        }),
+
     })
 
-    const { curLoc, destinationCords } = state
+    const { curLoc, destinationCords, coordinate } = state
 
     //get live location every 5 second
     const [locCall, setlocCall] = useState(false)
 
-    
+
 
     // GET LIVE Location
     useEffect(() => {
@@ -59,13 +67,20 @@ export const MapPage = (props) => {
             const locPerssionDenied = await locationPermission();
             if (locPerssionDenied) {
                 const { latitude, longitude } = await getCurrentLocation();
-                console.log("get location after 5 seconds => ", latitude, " and ", longitude);
+                // console.log("get location after 5 seconds => ", latitude, " and ", longitude);
+                animate(latitude, longitude)
                 setSate({
                     ...state,
                     curLoc: {
                         latitude: latitude,
                         longitude: longitude
-                    }
+                    },
+                    coordinate: new AnimatedRegion({
+                        latitude: latitude,
+                        longitude: longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.1,
+                    })
                 })
 
                 if (locCall) {
@@ -78,8 +93,8 @@ export const MapPage = (props) => {
                     // Calculate distance between current location to select location
                     const distanceInMeters = geolib.getDistance(pointA, pointB);
                     set_crnt_distace(distanceInMeters)
-                    console.log("seee its worked or not === > ", curLoc)
-                    console.log("Distance:", distanceInMeters);
+                    //console.log("seee its worked or not === > ", curLoc)
+                    //console.log("Distance:", distanceInMeters);
 
                 }
             }
@@ -111,17 +126,20 @@ export const MapPage = (props) => {
 
 
 
-    console.log("Current distance------------------>", crnt_distance)
+    // console.log("Current distance------------------>", crnt_distance)
 
     // save a place's latitude and longitude
     const [savea_Place, setSaveaPlace] = useState({})
+
+    //save current location for smooth direction
+    const [save_curloc, setsave_curloc] = useState({})
 
     //marker ref
     const animate = (latitude, longitude) => {
         const newCoordinate = { latitude, longitude };
         if (Platform.OS == 'android') {
             if (markerRef.current) {
-                markerRef.current.animateMarkerToCoordinate(newCoordinate, 7000);
+                markerRef.current.animateMarkerToCoordinate(newCoordinate, 4000);
             }
         } else {
             curLoc.timing(newCoordinate).start();
@@ -173,9 +191,11 @@ export const MapPage = (props) => {
     const setModalforlist = (val) => {
         setdata(true)
 
-        // save a certain place info for measure crnt distance
 
+        // save current location
         setSaveaPlace(val)
+
+        setsave_curloc(curLoc)
 
         setrouteDistance(val.distance)
 
@@ -189,10 +209,30 @@ export const MapPage = (props) => {
 
     }
 
+    // saving the duration and destionton for each place/ destination 
+
+    const [placesInfo, setPlacesInfo] = useState({});
+    useEffect(() => {
+        if (curLoc.latitude && curLoc.longitude) {
+            const data = information.map(async (item) => {
+                return {
+                    info: await getDistanceAndDuration(curLoc, item),
+                    titles: item.titles
+                };
+            });
+
+            // Use Promise.all to wait for all asynchronous operations to complete
+            Promise.all(data).then((result) => {
+
+                setPlacesInfo(result)
+
+            });
+        }
+
+    }, [curLoc]);
 
 
-
-
+    //console.log(placesInfo)
 
     //set modal
     const setModal = (val) => {
@@ -200,24 +240,28 @@ export const MapPage = (props) => {
         setdata(true)
 
         //val = destination location
-        console.log("destination ====", val)
+        // console.log("destination ====", val)
+
+        // save current location
+        setsave_curloc(curLoc)
+
 
         //Save a place's info
         setSaveaPlace(val)
 
-        //current location point A
-        const pointA = { latitude: curLoc.latitude, longitude: curLoc.longitude };
-
-        //Destination locatiom point B
-        const pointB = { latitude: val.latitudes, longitude: val.longitudes };
-
-        // Calculate distance between current location to select location
-        const distanceInMeters = geolib.getDistance(pointA, pointB);
-
+        let matchingIndex = 0
+        const Serach = placesInfo.some((place, index) => {
+            if (place.titles === val.titles) {
+              matchingIndex = index;
+              return true; // Stop iterating when a match is found
+            }
+            return false;
+          })
+          
         //save distance 
-        setrouteDistance(distanceInMeters)
+        setrouteDistance(placesInfo[matchingIndex].info.distance)
 
-        console.log("distance ====", distanceInMeters);
+        // console.log("distance ====", distanceInMeters);
 
         // save select destination lcation
         setSate({
@@ -234,14 +278,14 @@ export const MapPage = (props) => {
     // fetch modal close button info from modal.js
     const modal_close_btn = (val) => {
         //val = false
-        console.log("value ===>>>> ", val)
+        // console.log("value ===>>>> ", val)
         setdata(val)
     }
 
     // fetch modal confirm button info from modal.js
     const modal_confirm_btn = (val) => {
         // val = true
-        console.log("route info", val)
+        // console.log("route info", val)
         setmapRoute(val)
         setcnclBtn(true)
         setdata(false)
@@ -250,6 +294,7 @@ export const MapPage = (props) => {
 
     }
     //console.log("check Current distance show? ",curnt_dist_Show)
+
 
     //cancle button for route from current location to destination location
     const cancleRoute = () => {
@@ -260,7 +305,38 @@ export const MapPage = (props) => {
         //console.log("route info from cancle route", mapRoute)
     }
 
-    
+    // get distance and duration for a destination
+
+    const getDistanceAndDuration = async (origin, destination) => {
+        const originCoordinates = `${origin.latitude},${origin.longitude}`;
+        const destinationCoordinates = `${destination.latitudes},${destination.longitudes}`;
+        const API_KEY = Google_API; // Replace with your actual API key
+
+        try {
+            const response = await fetch(
+                `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${originCoordinates}&destinations=${destinationCoordinates}&key=${API_KEY}`
+            );
+            const data = await response.json();
+
+            if (data.status === 'OK' && data.rows.length > 0 && data.rows[0].elements.length > 0) {
+
+                const distance = parseFloat(data.rows[0].elements[0].distance.value); // distance in meters
+                const duration = parseInt(data.rows[0].elements[0].duration.value / 60); // duration in minutes
+               
+                //console.log('Distance:', distance);
+                //console.log('Duration:', duration);
+                return { distance, duration }
+
+                // You can set these values in your state or perform any other actions with them
+            } else {
+                console.error('Error fetching distance and duration:', data.status);
+            }
+        } catch (error) {
+            console.error('Error fetching distance and duration:', error);
+        }
+    };
+
+
 
     return (
         <View style={{ flex: 1 }}>
@@ -269,28 +345,19 @@ export const MapPage = (props) => {
                 ref={mapRef}
             >
                 {
-                    destinationCords && destinationCords.latitude && destinationCords.longitude && mapRoute ? (
+                    destinationCords.latitude && destinationCords.longitude && mapRoute ? (
                         <MapViewDirections
-                            origin={curLoc}
+                            origin={save_curloc}
                             destination={destinationCords}
                             apikey={Google_API}
                             strokeWidth={2.5}
                             optimizeWaypoints={true}
                             resetOnChange={true}
                             onStart={(params) => {
-                                console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
+                                //console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
                             }}
                             onReady={result => {
-                                /* console.log(`Distance: ${result.distance} km`)
-                                console.log(`Duration: ${result.duration} min.`) */
-                                mapRef.current.fitToCoordinates(result.coordinates, {
-                                    edgePadding: {
-                                        // right: 30,
-                                        // bottom: 300,
-                                        // left: 30,
-                                        // top: 100,
-                                    },
-                                });
+
                             }}
 
                         />
@@ -299,13 +366,14 @@ export const MapPage = (props) => {
 
                 <Marker.Animated
                     ref={markerRef}
-                    coordinate={curLoc}
+                    coordinate={coordinate}
                 >
                     <Image
                         source={require("../img/currentlocation.png")}
                         style={{ width: 80, height: 80 }}
                     />
                 </Marker.Animated>
+
                 {
                     information.map((item, index) => (
                         <Marker key={index}
@@ -314,7 +382,13 @@ export const MapPage = (props) => {
                                 longitude: item.longitudes,
                             }}
                             title={item.titles}
-                            onPress={() => !cnclBtn && setModal(item)}
+                            onPress={() => {
+                                if (!cnclBtn) {
+                                    setModal(item)
+                                    /* getDistanceAndDuration(curLoc, item); */
+                                }
+
+                            }}
                         >
                             <Image
                                 source={require("../img/parking.png")}
@@ -333,19 +407,35 @@ export const MapPage = (props) => {
                 onPress={onCenter}
             >
                 <Image source={require("../img/crntbtn.png")}
-                style={{height:80,width:80}} />
+                    style={{ height: 80, width: 80 }} />
             </TouchableOpacity>
 
 
             {!mapRoute ? (
                 <View style={{ flex: 1 }}>
                     <ListPages
-                        provideloc={curLoc}
-                        PlaceLoc={information}
+                        provideinfo={placesInfo}
                         funcformodalopen={setModalforlist}
                     />
                 </View>) : null
             }
+            {/* {
+                placesInfo ? (
+                    <View>
+                        {
+                            Object.keys(placesInfo).map((key, index) => (
+                                <View key={index}>
+                                    <Text>{placesInfo[key].titles}</Text>
+                                    <Text>Distance: {placesInfo[key].info.distance}</Text>
+                                    <Text>Duration: {placesInfo[key].info.duration}</Text>
+                                </View>
+                            ))
+                        }
+                    </View>
+                ) : null
+            } */}
+
+
             {mapRoute && crnt_distance ? (
                 <View style={{ padding: 20, alignItems: "center" }}>
                     <Text style={{ fontSize: 20, textAlign: "center", fontWeight: "bold" }}>Distancce</Text>
