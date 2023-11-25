@@ -46,6 +46,7 @@ export const MapPage = (props) => {
             latitudeDelta: LATITUDE_DELTA,
             longitudeDelta: LONGITUDE_DELTA,
         }),
+       
 
     })
 
@@ -67,8 +68,12 @@ export const MapPage = (props) => {
             const locPerssionDenied = await locationPermission();
             if (locPerssionDenied) {
                 const { latitude, longitude } = await getCurrentLocation();
-                // console.log("get location after 5 seconds => ", latitude, " and ", longitude);
+                console.log("get location after 5 seconds => ", latitude, " and ", longitude);
                 animate(latitude, longitude)
+                const point_A = {
+                    latitude: latitude,
+                    longitude: longitude
+                }
                 setSate({
                     ...state,
                     curLoc: {
@@ -84,18 +89,10 @@ export const MapPage = (props) => {
                 })
 
                 if (locCall) {
-                    //current location point A
-                    const pointA = { latitude: latitude, longitude: longitude };
-
-                    //Destination locatiom point B
-                    const pointB = { latitude: savea_Place.latitudes, longitude: savea_Place.longitudes };
-
-                    // Calculate distance between current location to select location
-                    const distanceInMeters = geolib.getDistance(pointA, pointB);
-                    set_crnt_distace(distanceInMeters)
-                    //console.log("seee its worked or not === > ", curLoc)
-                    //console.log("Distance:", distanceInMeters);
-
+                    
+                    const dist = await getDistanceAndDuration(point_A, savea_Place)
+                    console.log("==============",dist.distance)
+                    set_crnt_distace(dist.distance)
                 }
             }
 
@@ -198,6 +195,7 @@ export const MapPage = (props) => {
         setsave_curloc(curLoc)
 
         setrouteDistance(val.distance)
+        console.log("======value======\n",val)
 
         setSate({
             ...state,
@@ -217,7 +215,9 @@ export const MapPage = (props) => {
             const data = information.map(async (item) => {
                 return {
                     info: await getDistanceAndDuration(curLoc, item),
-                    titles: item.titles
+                    titles: item.titles,
+                    latitudes:item.latitudes,
+                    longitudes:item.longitudes
                 };
             });
 
@@ -257,7 +257,7 @@ export const MapPage = (props) => {
             }
             return false;
           })
-          
+
         //save distance 
         setrouteDistance(placesInfo[matchingIndex].info.distance)
 
@@ -323,24 +323,26 @@ export const MapPage = (props) => {
                 const distance = parseFloat(data.rows[0].elements[0].distance.value); // distance in meters
                 const duration = parseInt(data.rows[0].elements[0].duration.value / 60); // duration in minutes
                
-                //console.log('Distance:', distance);
+                console.log('Distance:', distance);
                 //console.log('Duration:', duration);
                 return { distance, duration }
 
                 // You can set these values in your state or perform any other actions with them
             } else {
                 console.error('Error fetching distance and duration:', data.status);
+               return { distance: 0, duration: 0 }; // Return default values or handle the error
             }
         } catch (error) {
             console.error('Error fetching distance and duration:', error);
         }
     };
 
-
+  
+    
 
     return (
         <View style={{ flex: 1 }}>
-            <MapView style={{ height: mapRoute ? '70%' : '50%', width: '100%', marginBottom: 15 }}
+            <MapView style={{ height: mapRoute ? '60%' : '50%', width: '100%', marginBottom: 15 }}
                 initialRegion={curLoc}
                 ref={mapRef}
             >
@@ -355,9 +357,6 @@ export const MapPage = (props) => {
                             resetOnChange={true}
                             onStart={(params) => {
                                 //console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
-                            }}
-                            onReady={result => {
-
                             }}
 
                         />
@@ -385,7 +384,6 @@ export const MapPage = (props) => {
                             onPress={() => {
                                 if (!cnclBtn) {
                                     setModal(item)
-                                    /* getDistanceAndDuration(curLoc, item); */
                                 }
 
                             }}
