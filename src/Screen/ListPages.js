@@ -4,38 +4,29 @@ import { DESTINATION } from './Destination';
 import * as geolib from 'geolib';
 import { COLOR } from '../Constrains/COLOR';
 
-export const ListPages = ({ provideloc,PlaceLoc,funcformodalopen }) => {
+export const ListPages = ({ provideinfo,funcformodalopen }) => {
     const [locationdist, setlocationdist] = useState([]);
-    //console.log("ding ding >>>>>>>>>",PlaceLoc)
+    //console.log("ding ding >>>>>>>>>",provideinfo)
     useEffect(() => {
-        // Calculate current location to destination distance only if provideloc is available
-        if (provideloc && provideloc.latitude && provideloc.longitude) {
-            const distances = PlaceLoc.map((item, index) => {
-                const destination =item;
-                if (destination.latitudes && destination.longitudes) {
-                    return {
-                        titles: item.titles,
-                        distance: geolib.getDistance(
-                            { latitude: provideloc.latitude, longitude: provideloc.longitude },
-                            { latitude: destination.latitudes, longitude: destination.longitudes }
-                        ),
-                        latitudes:item.latitudes,
-                        longitudes:item.longitudes
-                    };
-                } else {
-                    return {
-                        title: item.titles,
-                        distance: 0, // Handle cases where coordinates are missing or invalid
-                    };
-                }
-            });
+        if (Object.keys(provideinfo).length > 0) {
+            const placesArray = Object.keys(provideinfo).map((key) => ({
+                key: key,
+                distance: provideinfo[key].info.distance,
+                duration: provideinfo[key].info.duration,
+                title: provideinfo[key].titles,
+                latitudes: provideinfo[key].latitudes,
+                longitudes: provideinfo[key].longitudes
+            }));
 
-            // Sort the distances from smallest to largest
-            distances.sort((a, b) => a.distance - b.distance);
+            // Sort the array based on the 'duration' property
+            placesArray.sort((a, b) => a.distance - b.distance);
+          // console.log("place info ======================= ",placesArray)
 
-            setlocationdist(distances);
+
+            // Update the state with the sorted keys
+            setlocationdist(placesArray);
         }
-    }, [provideloc]);
+    }, [provideinfo]);
     const heythere = (item)=>{
         console.log("ok parfect",item)
         funcformodalopen(item)
@@ -43,26 +34,25 @@ export const ListPages = ({ provideloc,PlaceLoc,funcformodalopen }) => {
 
     return (
         <ScrollView>
-            {
-                locationdist.length > 0 ? (
-                    <View style={{ alignItems: "center" }}>
-                        {locationdist.map((item, index) => (
-                            <TouchableOpacity
+            {locationdist.length > 0 ? (
+                <View style={{ alignItems: "center" }}>
+                    {locationdist.map((item, index) => (
+                        <TouchableOpacity
                             key={index}
                             style={styles.card}
-                            onPress={()=>heythere(item)}
+                            onPress={() => heythere(item)}
                         >
-                            <Text style={styles.card_text}>{item.titles}</Text>
+                            <Text style={styles.card_text}>{item.title}</Text>
                             <Text style={styles.card_text}>Distance: {item.distance} meters</Text>
+                            <Text style={styles.card_text}>Duration: {item.duration} min</Text>
                         </TouchableOpacity>
-                            
-                        ))}
-                    </View>
-
-                ) : (<View>
+                    ))}
+                </View>
+            ) : (
+                <View>
                     <ActivityIndicator size="large" color="#0000ff" />
-                </View>)
-            }
+                </View>
+            )}
         </ScrollView>
     );
 };
