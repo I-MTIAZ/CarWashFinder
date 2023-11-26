@@ -10,6 +10,7 @@ import { Google_API } from '../Constrains/GoogleApi'
 import * as geolib from 'geolib';
 import { COLOR } from '../Constrains/COLOR';
 import { ListPages } from './ListPages';
+import { Review } from './Review';
 
 
 const screen = Dimensions.get('window');
@@ -20,6 +21,9 @@ const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 export const MapPage = (props) => {
     const mapRef = useRef()
     const markerRef = useRef()
+
+    //set review
+    const [review, setreview] = useState(false)
 
     const information = props.route.params
     //console.log(information[1])
@@ -46,7 +50,7 @@ export const MapPage = (props) => {
             latitudeDelta: LATITUDE_DELTA,
             longitudeDelta: LONGITUDE_DELTA,
         }),
-       
+
 
     })
 
@@ -55,6 +59,16 @@ export const MapPage = (props) => {
     //get live location every 5 second
     const [locCall, setlocCall] = useState(false)
 
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+          setreview(true);
+          console.log(savea_Place);
+        }, 15000); // 15 seconds in milliseconds
+      
+        // Clear the timeout if the component unmounts before the 15 seconds
+        return () => clearTimeout(timeoutId);
+      }, []);
+      
 
 
     // GET LIVE Location
@@ -89,9 +103,9 @@ export const MapPage = (props) => {
                 })
 
                 if (locCall) {
-                    
+
                     const dist = await getDistanceAndDuration(point_A, savea_Place)
-                    console.log("==============",dist.distance)
+                    console.log("==============", dist.distance)
                     set_crnt_distace(dist.distance)
                 }
             }
@@ -195,7 +209,7 @@ export const MapPage = (props) => {
         setsave_curloc(curLoc)
 
         setrouteDistance(val.distance)
-        console.log("======value======\n",val)
+        console.log("======value======\n", val)
 
         setSate({
             ...state,
@@ -216,8 +230,8 @@ export const MapPage = (props) => {
                 return {
                     info: await getDistanceAndDuration(curLoc, item),
                     titles: item.titles,
-                    latitudes:item.latitudes,
-                    longitudes:item.longitudes
+                    latitudes: item.latitudes,
+                    longitudes: item.longitudes
                 };
             });
 
@@ -252,11 +266,11 @@ export const MapPage = (props) => {
         let matchingIndex = 0
         const Serach = placesInfo.some((place, index) => {
             if (place.titles === val.titles) {
-              matchingIndex = index;
-              return true; // Stop iterating when a match is found
+                matchingIndex = index;
+                return true; // Stop iterating when a match is found
             }
             return false;
-          })
+        })
 
         //save distance 
         setrouteDistance(placesInfo[matchingIndex].info.distance)
@@ -322,7 +336,7 @@ export const MapPage = (props) => {
 
                 const distance = parseFloat(data.rows[0].elements[0].distance.value); // distance in meters
                 const duration = parseInt(data.rows[0].elements[0].duration.value / 60); // duration in minutes
-               
+
                 console.log('Distance:', distance);
                 //console.log('Duration:', duration);
                 return { distance, duration }
@@ -330,15 +344,19 @@ export const MapPage = (props) => {
                 // You can set these values in your state or perform any other actions with them
             } else {
                 console.error('Error fetching distance and duration:', data.status);
-               return { distance: 0, duration: 0 }; // Return default values or handle the error
+                return { distance: 0, duration: 0 }; // Return default values or handle the error
             }
         } catch (error) {
             console.error('Error fetching distance and duration:', error);
         }
     };
 
-  
-    
+    const review_close_btn = (val) => {
+        setreview(val)
+    }
+
+
+
 
     return (
         <View style={{ flex: 1 }}>
@@ -462,6 +480,15 @@ export const MapPage = (props) => {
                     routedistance={routeDistance}
                 />
             </View>
+
+            <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Review
+                    value={review}
+                    close_btn={review_close_btn}
+                    location={savea_Place}
+                />
+            </View>
+
 
         </View>
     );
