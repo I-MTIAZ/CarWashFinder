@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform,Alert } from 'react-native';
 import MapView, { AnimatedRegion, Marker } from 'react-native-maps';
 import MapViewDirections from "react-native-maps-directions";
 import { useState, useRef, useEffect } from 'react';
@@ -7,10 +7,10 @@ import { locationPermission, getCurrentLocation } from '../Helperfuncton/Helperf
 import { MODAL } from './MODAL';
 import CustomBtn from './CustomBtn';
 import { Google_API } from '../Constrains/GoogleApi'
-import * as geolib from 'geolib';
 import { COLOR } from '../Constrains/COLOR';
 import { ListPages } from './ListPages';
 import { Review } from './Review';
+import * as Keychain from "react-native-keychain";
 
 
 const screen = Dimensions.get('window');
@@ -18,15 +18,22 @@ const ASPECT_RATIO = screen.width / screen.height;
 const LATITUDE_DELTA = 0.04;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
+
 export const MapPage = (props) => {
     const mapRef = useRef()
     const markerRef = useRef()
+    //console.log(props.route.params.data)
+    //username in credintials
+    const credentials = props.route.params.data
+
+    //console.log("in map checking => ",credentials);
+
 
     //set review
     const [review, setreview] = useState(false)
 
-    const information = props.route.params
-    //console.log(information[1])
+    const information = props.route.params.destlocation
+    //console.log(information)
 
     // save current distance
     const [crnt_distance, set_crnt_distace] = useState('')
@@ -59,16 +66,16 @@ export const MapPage = (props) => {
     //get live location every 5 second
     const [locCall, setlocCall] = useState(false)
 
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-          setreview(true);
-          console.log(savea_Place);
-        }, 15000); // 15 seconds in milliseconds
-      
-        // Clear the timeout if the component unmounts before the 15 seconds
-        return () => clearTimeout(timeoutId);
-      }, []);
-      
+    /* useEffect(() => {
+       const timeoutId = setTimeout(() => {
+           setreview(true);
+           console.log(savea_Place);
+       }, 15000); // 15 seconds in milliseconds
+ 
+       // Clear the timeout if the component unmounts before the 15 seconds
+       return () => clearTimeout(timeoutId);
+   }, []); */
+
 
 
     // GET LIVE Location
@@ -105,14 +112,33 @@ export const MapPage = (props) => {
                 if (locCall) {
 
                     const dist = await getDistanceAndDuration(point_A, savea_Place)
-                    console.log("==============", dist.distance)
+                    //console.log("==============", dist.distance)
                     set_crnt_distace(dist.distance)
+                    if (dist.distance < 15) {
+                        console.log("i am distance == ", dist.distance);
+                      
+                        // Set a timeout to trigger setReview(true) after 15 seconds
+                        const timeoutId = setTimeout(() => {
+                          setreview(true);
+                          cancleRoute()
+                        }, 15000);
+                      
+                        // Clear the timeout if the component unmounts or if distance becomes >= 5 before 15 seconds
+                        return () => clearTimeout(timeoutId);
+                      }
+                        
                 }
             }
 
         } catch (error) {
             // Handle the error or rejection here
-            console.error("Error getting location permission:", error);
+            //console.error("Error getting location permission:", error);
+            Alert.alert(
+                'Error getting location permission',
+                 error,
+                [{ text: 'OK', onPress: getLiveLocation }]
+                
+              );
             // You might want to set a state or show a message to the user
         }
     }
@@ -160,15 +186,15 @@ export const MapPage = (props) => {
 
     // for mapref start for first time
 
-    /* useEffect(() => {
-        const newCoords = {
-            latitude: curLoc.latitude,
-            longitude: curLoc.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-        };
-        mapRef.current?.animateToRegion(newCoords, 5000);
-    }, [curLoc]); */
+    /*   useEffect(() => {
+          const newCoords = {
+              latitude: curLoc.latitude,
+              longitude: curLoc.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+          };
+          mapRef.current?.animateToRegion(newCoords, 5000);
+      }, [curLoc]); */
     const onCenter = () => {
         mapRef.current.animateToRegion({
             latitude: curLoc.latitude,
@@ -208,8 +234,8 @@ export const MapPage = (props) => {
 
         setsave_curloc(curLoc)
 
-        setrouteDistance(val.distance)
-        console.log("======value======\n", val)
+        setrouteDistance({ dist: val.distance, duration: val.duration })
+        //console.log("======value======\n", val)
 
         setSate({
             ...state,
@@ -231,7 +257,8 @@ export const MapPage = (props) => {
                     info: await getDistanceAndDuration(curLoc, item),
                     titles: item.titles,
                     latitudes: item.latitudes,
-                    longitudes: item.longitudes
+                    longitudes: item.longitudes,
+                    review: item.review
                 };
             });
 
@@ -263,17 +290,27 @@ export const MapPage = (props) => {
         //Save a place's info
         setSaveaPlace(val)
 
-        let matchingIndex = 0
-        const Serach = placesInfo.some((place, index) => {
+        let matchingIndex = -1; // Initialize matchingIndex to -1 if no match is found
+        const searchResult = placesInfo.some((place, index) => {
             if (place.titles === val.titles) {
-                matchingIndex = index;
+                matchingIndex = index; // Update matchingIndex when a match is found
                 return true; // Stop iterating when a match is found
             }
             return false;
-        })
+        });
+
+        // Use matchingIndex as needed
+        if (searchResult) {
+            console.log('Match found at index:', matchingIndex);
+        } else {
+            console.log('No match found.');
+        }
 
         //save distance 
-        setrouteDistance(placesInfo[matchingIndex].info.distance)
+        setrouteDistance({
+            dist: placesInfo[matchingIndex].info.distance,
+            duration: placesInfo[matchingIndex].info.duration
+        })
 
         // console.log("distance ====", distanceInMeters);
 
@@ -337,7 +374,7 @@ export const MapPage = (props) => {
                 const distance = parseFloat(data.rows[0].elements[0].distance.value); // distance in meters
                 const duration = parseInt(data.rows[0].elements[0].duration.value / 60); // duration in minutes
 
-                console.log('Distance:', distance);
+                //console.log('Distance:', distance);
                 //console.log('Duration:', duration);
                 return { distance, duration }
 
@@ -432,6 +469,7 @@ export const MapPage = (props) => {
                     <ListPages
                         provideinfo={placesInfo}
                         funcformodalopen={setModalforlist}
+
                     />
                 </View>) : null
             }
@@ -478,6 +516,9 @@ export const MapPage = (props) => {
                     close_btn={modal_close_btn}
                     confirm_btn={modal_confirm_btn}
                     routedistance={routeDistance}
+                    locationame={savea_Place.titles}
+                    star={savea_Place.review}
+                    pp={props}
                 />
             </View>
 
@@ -486,6 +527,8 @@ export const MapPage = (props) => {
                     value={review}
                     close_btn={review_close_btn}
                     location={savea_Place}
+                    username={credentials}
+
                 />
             </View>
 

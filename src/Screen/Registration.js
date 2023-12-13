@@ -8,6 +8,9 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useState } from 'react';
+import * as Keychain from "react-native-keychain";
+import { DataBase } from "../Constrains/GoogleApi";
+import {CommonActions} from '@react-navigation/native';
 
 
 
@@ -26,7 +29,7 @@ export const Registration = (props) => {
     
     
     password === cpassword && password!== "" && cpassword !== "" && email !== "" ?
-      (fetch('http://192.168.68.103:300/register', {
+      (fetch(`${DataBase}/register`,{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +39,12 @@ export const Registration = (props) => {
         .then(response => response.json())
         .then(data => {
           console.log(data);
-          props.navigation.navigate('MAP')
+          Keychain.setGenericPassword(email, password);
+          // Pass credentials to START screen and prevent going back
+          props.navigation.dispatch(CommonActions.navigate({
+            name: 'START',
+            params: email,
+        }));
           // Handle success or error response from the backend
         })
         .catch(error => {

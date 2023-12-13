@@ -10,7 +10,7 @@ import {
 import React from "react";
 import { COLOR } from "../Constrains/COLOR";
 import { Colors } from "react-native/Libraries/NewAppScreen";
-
+import { NETINFO } from "./NETINFO"
 
 
 const { height } = Dimensions.get("window");
@@ -35,11 +35,11 @@ export const Welcome = (props) => {
                 >
                     <Text
                         style={{
-                            fontSize:30,
-                            padding:30,
-                            fontWeight:"bold",
-                            textAlign:"center",
-                            color:"blue",
+                            fontSize: 30,
+                            padding: 30,
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            color: "blue",
                         }}
                     >
                         Discover Your Dream Parking here
@@ -48,9 +48,9 @@ export const Welcome = (props) => {
                     <Text
                         style={{
                             textAlign: "center",
-                            fontSize:15,
-                            fontWeight:"500",
-                            marginBottom: height/15
+                            fontSize: 15,
+                            fontWeight: "500",
+                            marginBottom: height / 15
 
                         }}
                     >
@@ -61,21 +61,21 @@ export const Welcome = (props) => {
                 <View
                     style={{
                         flexDirection: "row",
-                        padding:18
+                        padding: 18
                     }}
                 >
                     <TouchableOpacity
                         onPress={() => props.navigation.navigate('LOGIN')}
                         style={{
 
-                            height:height/12,
+                            height: height / 12,
                             width: "48%",
-                            backgroundColor:COLOR.Deep_Sea,
-                            justifyContent:"center",
-                            borderRadius:10,
+                            backgroundColor: COLOR.Deep_Sea,
+                            justifyContent: "center",
+                            borderRadius: 10,
                             shadowOffset: {
                                 width: 0,
-                                backgroundColor:COLOR.Night
+                                backgroundColor: COLOR.Night
 
                             },
                             shadowOpacity: 0.3,
@@ -84,10 +84,10 @@ export const Welcome = (props) => {
                     >
                         <Text
                             style={{
-                                fontSize:25,
-                                fontWeight:"500",
+                                fontSize: 25,
+                                fontWeight: "500",
                                 textAlign: "center",
-                                color:COLOR.Snow
+                                color: COLOR.Snow
                             }}
                         >
                             Login
@@ -96,19 +96,19 @@ export const Welcome = (props) => {
                     <TouchableOpacity
                         onPress={() => props.navigation.navigate('REGIST')}
                         style={{
-                            height:height/12,
+                            height: height / 12,
                             width: "48%",
-                            justifyContent:"center",
-                            borderRadius:10,
+                            justifyContent: "center",
+                            borderRadius: 10,
                         }}
                     >
                         <Text
                             style={{
-                                fontSize:25,
-                                fontWeight:"bold",
+                                fontSize: 25,
+                                fontWeight: "bold",
                                 textAlign: "center",
-                                color:"black"
-                                
+                                color: "black"
+
                             }}
                         >
                             Register
@@ -116,6 +116,10 @@ export const Welcome = (props) => {
                     </TouchableOpacity>
                 </View>
             </View>
+            <View style={{ height: height / 12, }}>
+                <NETINFO />
+            </View>
+
         </SafeAreaView>
     );
 };

@@ -6,24 +6,26 @@ const transparent = '#828282'
 import { Rating, AirbnbRating } from 'react-native-ratings';
 const { height } = Dimensions.get("window");
 import axios from 'axios';
+import { DataBase } from "../Constrains/GoogleApi";
 
-export const Review = ({ value, close_btn,location }) => {
+export const Review = ({ value, close_btn,location,username }) => {
     const [star, setStar] = useState()
     const [textInput, setTextInput] = useState('');
-
+    console.log(username)
    
     const HAHA = (a) => {
         setStar(a)
     }
-    console.log(star)
-    console.log(textInput)
+    //console.log(star)
+    //console.log(textInput)
 
     const submitReview = () => {
         // Make a POST request to insert a new review on the server
-        axios.post('http://192.168.68.110:300/insertReview', {
+        axios.post(`${DataBase}/insertReview`, {
           star: star,
           text: textInput,
-          location:location.titles
+          location:location.titles,
+          uname:username
         })
           .then(response => {
             console.log('Review submitted successfully:', response.data);
@@ -56,7 +58,7 @@ export const Review = ({ value, close_btn,location }) => {
                         <AirbnbRating
                             count={5}
                             reviews={["Bad", "OK", "Good", "Very Good", "Amazing",]}
-                            defaultRating={1}
+                            defaultRating={0}
                             size={30}
                             onFinishRating={(rat) => HAHA(rat)}
                             reviewSize={25}

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator, ScrollView,TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text,  ScrollView, TouchableOpacity } from 'react-native';
 import { DESTINATION } from './Destination';
-import * as geolib from 'geolib';
 import { COLOR } from '../Constrains/COLOR';
+import { Rating, AirbnbRating } from 'react-native-ratings';
+import Spinner from 'react-native-loading-spinner-overlay';
 
-export const ListPages = ({ provideinfo,funcformodalopen }) => {
+export const ListPages = ({ provideinfo, funcformodalopen }) => {
     const [locationdist, setlocationdist] = useState([]);
     //console.log("ding ding >>>>>>>>>",provideinfo)
     useEffect(() => {
@@ -13,22 +14,23 @@ export const ListPages = ({ provideinfo,funcformodalopen }) => {
                 key: key,
                 distance: provideinfo[key].info.distance,
                 duration: provideinfo[key].info.duration,
-                title: provideinfo[key].titles,
+                titles: provideinfo[key].titles,
                 latitudes: provideinfo[key].latitudes,
-                longitudes: provideinfo[key].longitudes
+                longitudes: provideinfo[key].longitudes,
+                review: provideinfo[key].review
             }));
 
             // Sort the array based on the 'duration' property
             placesArray.sort((a, b) => a.distance - b.distance);
-          // console.log("place info ======================= ",placesArray)
+            // console.log("place info ======================= ",placesArray)
 
 
             // Update the state with the sorted keys
             setlocationdist(placesArray);
         }
     }, [provideinfo]);
-    const heythere = (item)=>{
-        console.log("ok parfect",item)
+    const heythere = (item) => {
+        console.log("ok parfect", item)
         funcformodalopen(item)
     }
 
@@ -42,15 +44,30 @@ export const ListPages = ({ provideinfo,funcformodalopen }) => {
                             style={styles.card}
                             onPress={() => heythere(item)}
                         >
-                            <Text style={styles.card_text}>{item.title}</Text>
+                            <Text style={styles.card_text}>{item.titles}</Text>
                             <Text style={styles.card_text}>Distance: {item.distance} meters</Text>
                             <Text style={styles.card_text}>Duration: {item.duration} min</Text>
+                            <AirbnbRating
+                                count={5}
+                                reviews={["Bad", "OK", "Good", "Very Good", "Amazing",]}
+                                defaultRating={item.review}
+                                size={25}
+                                starImage={require('../img/ratt.jpg')}
+                                selectedColor="orange"
+                                showRating={false}
+                                isDisabled={true}
+
+                            />
                         </TouchableOpacity>
                     ))}
                 </View>
             ) : (
                 <View>
-                    <ActivityIndicator size="large" color="#0000ff" />
+                    <Spinner
+                        visible={true}
+                        textContent={'Loading...'}
+                        textStyle={styles.spinnerText}
+                    />
                 </View>
             )}
         </ScrollView>
@@ -60,7 +77,7 @@ export const ListPages = ({ provideinfo,funcformodalopen }) => {
 const styles = StyleSheet.create({
     card: {
         width: '80%',
-        height: 100,
+        height: 150,
         alignItems: "center",
         padding: 10,
         marginBottom: 15,
