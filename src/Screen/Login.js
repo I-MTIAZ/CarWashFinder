@@ -34,7 +34,7 @@ export const Login = (props) => {
                         index: 0,
                         routes: [
                             {
-                                name: 'START',
+                                name: 'DrawNev',
                                 params: credentials.username,
                             },
                         ],
@@ -62,15 +62,19 @@ export const Login = (props) => {
 
                 // Pass credentials to START screen and prevent going back
                 props.navigation.dispatch(CommonActions.navigate({
-                    name: 'START',
+                    name: 'DrawNev',
                     params: email,
                 }));
             } catch (error) {
-                console.error('Error logging in:', error);
+                Alert.alert('Error logging in:', error);
                 Alert.alert('Login Failed', 'Invalid email or password');
+                setEmail("")
+                setPassword("")
             }
         } else {
             Alert.alert("Blanked field");
+            setEmail("")
+            setPassword("")
         }
     };
 

@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import * as Keychain from "react-native-keychain";
 import { DataBase } from "../Constrains/GoogleApi";
 import {CommonActions} from '@react-navigation/native';
-
+import axios from 'axios';
 
 
 
@@ -22,40 +22,45 @@ export const Registration = (props) => {
   const [cpassword, setcPassword] = useState('')
 
   const handleSignUp = () => {
-    console.log(email)
-    console.log(password)
-    console.log(cpassword)
-
-    
-    
-    password === cpassword && password!== "" && cpassword !== "" && email !== "" ?
-      (fetch(`${DataBase}/register`,{
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-        .then(response => response.json())
-        .then(data => {
+    console.log(email);
+    console.log(password);
+    console.log(cpassword);
+  
+    if (password === cpassword && password !== "" && cpassword !== "" && email !== "") {
+      axios.post(`${DataBase}/register`, { email, password })
+        .then(response => {
+          const data = response.data;
           console.log(data);
-          Keychain.setGenericPassword(email, password);
-          // Pass credentials to START screen and prevent going back
-          props.navigation.dispatch(CommonActions.navigate({
-            name: 'START',
-            params: email,
-        }));
-          // Handle success or error response from the backend
+  
+          if (data.success) {
+            // Registration successful
+            Keychain.setGenericPassword(email, password);
+            // Pass credentials to START screen and prevent going back
+            props.navigation.dispatch(CommonActions.navigate({
+              name: 'START',
+              params: email,
+            }));
+          } 
         })
         .catch(error => {
-          console.error('Error sending registration data:', error);
+          Alert.alert('Error sending registration data:', error);
           // Handle error
+          Alert.alert('Email already exists. Please use a different email.');
         })
-     ): Alert.alert(" Password Not Match")
-     setEmail("")
-     setPassword("")
-     setcPassword("")
-  }
+        .finally(() => {
+          // Reset form fields
+          setEmail("");
+          setPassword("");
+          setcPassword("");
+        });
+    } else {
+      Alert.alert("Password does not match");
+      // Reset form fields
+      setEmail("");
+      setPassword("");
+      setcPassword("");
+    }
+  };
 
 return (
   <SafeAreaView>

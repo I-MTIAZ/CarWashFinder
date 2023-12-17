@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, Image, ActivityIndicator,Alert } from 'react-native';
 import { Rating, AirbnbRating } from 'react-native-ratings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
@@ -46,13 +46,13 @@ export const All_Review = ({ locationname }) => {
 
         })
         .catch((error) => {
-          console.error('Error fetching location data:', error);
+          Alert.alert('Error fetching location review data:', error);
           if (error.response) {
-            console.error('Response data in error:', error.response.data);
+            console.log('Response data in error:', error.response.data);
           } else if (error.request) {
-            console.error('Request data in error:', error.request);
+            console.log('Request data in error:', error.request);
           } else {
-            console.error('Other error:', error.message);
+            console.log('Other error:', error.message);
           }
         });
     }

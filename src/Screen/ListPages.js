@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text,  ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { DESTINATION } from './Destination';
 import { COLOR } from '../Constrains/COLOR';
 import { Rating, AirbnbRating } from 'react-native-ratings';
 import Spinner from 'react-native-loading-spinner-overlay';
+import BottomSheet from 'react-native-simple-bottom-sheet';
 
 export const ListPages = ({ provideinfo, funcformodalopen }) => {
     const [locationdist, setlocationdist] = useState([]);
@@ -35,7 +36,8 @@ export const ListPages = ({ provideinfo, funcformodalopen }) => {
     }
 
     return (
-        <ScrollView>
+        <BottomSheet isOpen wrapperStyle={{backgroundColor:"#EEEEEE"}}>
+            <ScrollView>
             {locationdist.length > 0 ? (
                 <View style={{ alignItems: "center" }}>
                     {locationdist.map((item, index) => (
@@ -71,6 +73,7 @@ export const ListPages = ({ provideinfo, funcformodalopen }) => {
                 </View>
             )}
         </ScrollView>
+        </BottomSheet>
     );
 };
 

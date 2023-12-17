@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Modal, Text, TouchableOpacity, TextInput,Dimensions } from 'react-native';
+import { View, StyleSheet, Modal, Text, TouchableOpacity, TextInput,Dimensions,Alert } from 'react-native';
 import CustomBtn from './CustomBtn';
 import { COLOR } from '../Constrains/COLOR';
 const transparent = '#828282'
@@ -31,7 +31,7 @@ export const Review = ({ value, close_btn,location,username }) => {
             console.log('Review submitted successfully:', response.data);
           })
           .catch(error => {
-            console.error('Error submitting review:', error);
+            Alert.alert('Error submitting review:', error);
             // Handle error accordingly
           });
         close_btn(false);

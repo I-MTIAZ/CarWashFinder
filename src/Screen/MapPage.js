@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform,Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform, Alert } from 'react-native';
 import MapView, { AnimatedRegion, Marker } from 'react-native-maps';
 import MapViewDirections from "react-native-maps-directions";
 import { useState, useRef, useEffect } from 'react';
@@ -10,7 +10,7 @@ import { Google_API } from '../Constrains/GoogleApi'
 import { COLOR } from '../Constrains/COLOR';
 import { ListPages } from './ListPages';
 import { Review } from './Review';
-import * as Keychain from "react-native-keychain";
+import { NETINFO } from "./NETINFO"
 
 
 const screen = Dimensions.get('window');
@@ -20,6 +20,7 @@ const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 
 export const MapPage = (props) => {
+    console.log("i Am MAP PAGE")
     const mapRef = useRef()
     const markerRef = useRef()
     //console.log(props.route.params.data)
@@ -116,17 +117,17 @@ export const MapPage = (props) => {
                     set_crnt_distace(dist.distance)
                     if (dist.distance < 15) {
                         console.log("i am distance == ", dist.distance);
-                      
+
                         // Set a timeout to trigger setReview(true) after 15 seconds
                         const timeoutId = setTimeout(() => {
-                          setreview(true);
-                          cancleRoute()
+                            setreview(true);
+                            cancleRoute()
                         }, 15000);
-                      
+
                         // Clear the timeout if the component unmounts or if distance becomes >= 5 before 15 seconds
                         return () => clearTimeout(timeoutId);
-                      }
-                        
+                    }
+
                 }
             }
 
@@ -135,10 +136,10 @@ export const MapPage = (props) => {
             //console.error("Error getting location permission:", error);
             Alert.alert(
                 'Error getting location permission',
-                 error,
+                error,
                 [{ text: 'OK', onPress: getLiveLocation }]
-                
-              );
+
+            );
             // You might want to set a state or show a message to the user
         }
     }
@@ -148,7 +149,7 @@ export const MapPage = (props) => {
 
     useEffect(() => {
         let intervalId;
-        if (locCall) {
+        if (locCall && onNetworkChange) {
             intervalId = setInterval(() => {
                 getLiveLocation();
             }, 6000);
@@ -160,6 +161,11 @@ export const MapPage = (props) => {
             }
         };
     }, [locCall]);
+    const onNetworkChange = (val)=>{
+        console.log("from map page check internet is active = ",val)
+        if(val == false) 
+        props.navigation.navigate('START')
+    }
 
 
 
@@ -380,24 +386,30 @@ export const MapPage = (props) => {
 
                 // You can set these values in your state or perform any other actions with them
             } else {
-                console.error('Error fetching distance and duration:', data.status);
+                console.log('Error fetching distance and duration:', data.status);
                 return { distance: 0, duration: 0 }; // Return default values or handle the error
             }
         } catch (error) {
-            console.error('Error fetching distance and duration:', error);
+            Alert.alert('Error fetching distance and duration:', error);
         }
     };
 
     const review_close_btn = (val) => {
         setreview(val)
     }
+   /*  const onNetworkChange = (val)=>{
+        console.log("from map page check internet is active = ",val)
+        if(val == false) 
+        props.navigation.navigate('START')
+    } */
 
 
 
 
     return (
         <View style={{ flex: 1 }}>
-            <MapView style={{ height: mapRoute ? '60%' : '50%', width: '100%', marginBottom: 15 }}
+             <NETINFO onNetworkChange={onNetworkChange} />
+            <MapView style={{ height: mapRoute ? '60%' : '90%', width: '100%', marginBottom: 15 }}
                 initialRegion={curLoc}
                 ref={mapRef}
             >
@@ -531,8 +543,6 @@ export const MapPage = (props) => {
 
                 />
             </View>
-
-
         </View>
     );
 }

@@ -1,32 +1,40 @@
-// NETINFO.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import NetInfo from "@react-native-community/netinfo";
+import NetInfo from '@react-native-community/netinfo';
 
-export const NETINFO = ({ onNetworkChange }) => {
+export const NETINFO = ({ onNetworkChange,props}) => {
+  const [isConnected, setIsConnected] = useState(true);
+
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
+    const checkNetwork = async () => {
+      const state = await NetInfo.fetch();
+      setIsConnected(state.isConnected);
+      onNetworkChange && onNetworkChange(state.isConnected);
       if (!state.isConnected) {
         // Show an alert when isConnected is false
-        Alert.alert(
-          'Network Connection Issue',
-          'Please check your internet connection.',
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Network Connection Issue', 'Please check your internet connection.', [
+          { text: 'OK', onPress: checkNetwork },
+        ]);
+        //onNetworkChange && onNetworkChange(false);
       } else {
         // Call the parent component's function when the network is connected
-        onNetworkChange && onNetworkChange();
+        //onNetworkChange && onNetworkChange(true);
       }
+    };
+
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsConnected(state.isConnected);
     });
+
+    // Initial check when the component mounts
+    checkNetwork();
 
     return () => {
       unsubscribe();
     };
-  }, [onNetworkChange]);
+  }, [onNetworkChange, isConnected]);
 
-  return (
-    <View/>
-  );
+  return <View />;
 };
 
 const styles = StyleSheet.create({
