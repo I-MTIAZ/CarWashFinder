@@ -16,17 +16,19 @@ import Spinner from 'react-native-loading-spinner-overlay';
 
 export const Login = (props) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+
     const [userDetails, setUserDetails] = useState({});
     const Spacing = 0.2;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-
+    
     useEffect(() => {
+        
         (async () => {
             try {
+                Alert.alert('Wait for loading, if it takes too time restart the process', ' In Design process it will handle properly.', [{ text: 'OK' }]);
                 const credentials = await Keychain.getGenericPassword();
                 if (credentials) {
-                    setIsLoggedIn(true);
                     setUserDetails(credentials);
 
                     // Pass credentials to START screen and prevent going back
@@ -41,7 +43,7 @@ export const Login = (props) => {
                     }));
                 } else {
                     console.log("No credentials stored");
-                    setIsLoggedIn("");
+                    setIsLoggedIn(true);
                 }
             } catch (error) {
                 console.log("Keychain couldn't be accessed!", error);
@@ -57,7 +59,6 @@ export const Login = (props) => {
                 console.log(response.data);
                 console.log("====>>  Happy Login <<======");
                 Keychain.setGenericPassword(email, password);
-                setIsLoggedIn(true);
                 setUserDetails({ email, password });
 
                 // Pass credentials to START screen and prevent going back
@@ -66,24 +67,27 @@ export const Login = (props) => {
                     params: email,
                 }));
             } catch (error) {
-                Alert.alert('Error logging in:', error);
-                Alert.alert('Login Failed', 'Invalid email or password');
-                setEmail("")
-                setPassword("")
+                console.log('Error logging in:', error);
+                Alert.alert('Login Failed', 'Invalid email or password',
+                    [{ title: 'OK', onPress: setIsLoggedIn(true) }]);
+                setEmail("");
+                setPassword("");
             }
         } else {
-            Alert.alert("Blanked field");
-            setEmail("")
-            setPassword("")
+            console.log("EMAIL = ",email)
+            Alert.alert('Blanked field', 'try again', [{ title: 'OK', onPress: setIsLoggedIn(true) }]);
+
         }
     };
+
+    
 
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View>
                 {
-                    isLoggedIn == "" ? (
+                    isLoggedIn ? (
                         <View
                             style={{
                                 padding: Spacing * 2,
@@ -148,7 +152,10 @@ export const Login = (props) => {
                             </View>
 
                             <TouchableOpacity
-                                onPress={handleLogin}
+                                onPress={() => {
+                                    setIsLoggedIn(false);
+                                    handleLogin();
+                                }}
                                 style={{
                                     backgroundColor: "#0029D0",
                                     padding: 15,

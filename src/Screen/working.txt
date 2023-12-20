@@ -1,0 +1,80 @@
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, TextInput, Text, Alert, TouchableOpacity } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { locationPermission, getCurrentLocation } from '../Helperfuncton/Helperfun';
+
+export const NewPlaces = () => {
+  useEffect(() => {
+    getLiveLocation();
+  }, []);
+
+  const [region, setRegion] = useState({
+    latitude: 22.332671112167628,
+    longitude: 91.84030073971839,
+    latitudeDelta: 0.002,
+    longitudeDelta: 0.001,
+  });
+
+  const [markerPosition, setMarkerPosition] = useState({
+    latitude: 22.332671112167628,
+    longitude: 91.84030073971839,
+  });
+
+  const getLiveLocation = async () => {
+    try {
+      const locPerssionDenied = await locationPermission();
+      if (locPerssionDenied) {
+        const { latitude, longitude } = await getCurrentLocation();
+        setRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.002,
+          longitudeDelta: 0.001,
+        });
+        setMarkerPosition({
+          latitude,
+          longitude,
+        });
+      }
+    } catch (error) {
+      Alert.alert(
+        'Error getting location permission',
+        error.message,
+        [{ text: 'OK', onPress: getLiveLocation }],
+      );
+    }
+  };
+
+  const onMarkerDragEnd = (e) => {
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    setMarkerPosition({ latitude, longitude });
+    console.log('Marker dragged:', latitude, longitude);
+  };
+
+  const onMapPress = (e) => {
+    // Set marker position to the pressed location
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    setMarkerPosition({ latitude, longitude });
+    console.log('Marker dragged:', latitude, longitude);
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      <MapView
+        style={{ flex: 1, height: '50%', width: '100%' }}
+        initialRegion={region}
+        onPress={onMapPress}
+      >
+        <Marker
+          coordinate={markerPosition}
+          title="Drag Me!"
+          description="Your Location"
+          draggable
+          onDragEnd={onMarkerDragEnd}
+        />
+      </MapView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({});

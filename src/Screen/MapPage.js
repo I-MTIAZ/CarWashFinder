@@ -34,12 +34,14 @@ export const MapPage = (props) => {
     const [review, setreview] = useState(false)
 
     const information = props.route.params.destlocation
-    //console.log(information)
+    console.log(information)
 
     // save current distance
     const [crnt_distance, set_crnt_distace] = useState('')
 
     const [state, setSate] = useState({
+        // austria address 48.31864026223389, 14.278368460116216
+        //bd address 22.332671112167628, 91.84030073971839
         curLoc: {
             latitude: 22.332671112167628,
             longitude: 91.84030073971839,
@@ -390,7 +392,7 @@ export const MapPage = (props) => {
                 return { distance: 0, duration: 0 }; // Return default values or handle the error
             }
         } catch (error) {
-            Alert.alert('Error fetching distance and duration:', error);
+            console.log('Error fetching distance and duration:', error);
         }
     };
 

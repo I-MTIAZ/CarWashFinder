@@ -10,7 +10,7 @@ import { DataBase } from '../Constrains/GoogleApi';
 import * as Keychain from "react-native-keychain";
 import { CommonActions } from '@react-navigation/native';
 import { NETINFO } from "./NETINFO"
-
+import Spinner from 'react-native-loading-spinner-overlay';
 
 
 LogBox.ignoreLogs([
@@ -52,31 +52,33 @@ export const Start = (props) => {
 
   useEffect(() => {
     fetchData();
-    console.log("from start", props.route.params)
+    console.log("from start ", props.route.params)
   }, []); // Fetch data when the component mounts
 
 
-
+  const [act, setact] = useState(true)
   const onDone = () => {
-    destlocation.length > 0
-      ? props.navigation.navigate('MAP', { destlocation, data: props.route.params })
-      : Alert.alert(
-        'Data Not Fetched',
-        'Location data has not been fetched yet. Check your internet connection and try again.',
-        [{ text: 'OK', onPress: fetchData }]
-      );
+    // Set a timeout of 3000 milliseconds (3 seconds)
+    setact(false)
+    action()
+
   };
 
+  const action = () => {
+    setTimeout(() => {
+      if (!destlocation.length > 0) {
+        Alert.alert(
+          'Data Not Fetched, Location data has not been fetched yet.',
+          'wait for loading if takes too much time restart the process, it will handled in design process',
+          [{ text: 'OK', onPress: fetchData }])
 
-  const [act, setact] = useState(false);
+      } else {
+        setact(true)
+        props.navigation.navigate('MAP', { destlocation, data: props.route.params });
+      }
+    }, 5000); // Adjust the timeout duration as needed (in milliseconds)
+  }
 
-  const reviewgo = () => {
-    setact(true);
-  };
-
-  const modal_close_btn = (val) => {
-    setact(val);
-  };
 
   const handleLogout = async () => {
     const logout = await Keychain.resetGenericPassword();
@@ -116,33 +118,50 @@ export const Start = (props) => {
         }
       })
       .catch((error) => {
-        Alert.alert('Error:', error);
-        //Alert.alert('Error', 'Something went wrong');
+        console.log('Error:', error);
+        Alert.alert('Error', 'Something went wrong');
       });
 
   }
 
-  const Allreview = () => {
-    props.navigation.navigate('REV');
-  };
+  const handlenewplace = ()=>{
+    props.navigation.navigate('NPLACE')
+  }
+
+
 
   return (
     <View style={{ flex: 1 }}>
       <NETINFO />
-      <View>
-        <CustomBtn
-          btnText="Start"
-          btnStyle={{ backgroundColor: COLOR.SeaGreen }}
-          onPress={onDone}
-        />
-      </View>
-      <Button title='press' onPress={reviewgo} />
-      <View style={{ alignItems: "center", justifyContent: "center", marginVertical: 15 }}>
-        {/* Your Review component */}
-      </View>
-      <Button title='see all review' onPress={Allreview} />
-      <Button title='logout' onPress={handleLogout} />
-      <Button title='Delete Account' onPress={handleDeleteaccount} />
+      {
+        act ? (
+          <View>
+            <View>
+              <CustomBtn
+                btnText="Start"
+                btnStyle={{ backgroundColor: COLOR.SeaGreen }}
+                onPress={onDone}
+                
+              />
+            </View>
+            <View style={styles.gap}></View>
+            <Button title='logout' onPress={handleLogout}/>
+            <View style={styles.gap}></View>
+            <Button title='Delete Account' onPress={handleDeleteaccount}  />
+            <View style={styles.gap}></View>
+            <Button
+              title='Add New Parking'
+              onPress={handlenewplace}
+            />
+          </View>
+        ) : (<View>
+          <Spinner
+            visible={true}
+            textContent={'Loading...'}
+            textStyle={styles.spinnerText}
+          />
+        </View>)
+      }
     </View>
   );
 };
@@ -156,5 +175,8 @@ const styles = StyleSheet.create({
   },
   text_p: {
     fontSize: 20,
+  },
+  gap:{
+    marginVertical:15
   }
 });
