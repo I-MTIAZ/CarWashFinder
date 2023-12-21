@@ -1,26 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef } from 'react';
 import { View, StyleSheet, Text, Alert, Image, SafeAreaView } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { locationPermission, getCurrentLocation } from '../Helperfuncton/Helperfun';
+import { Button } from 'react-native-paper';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-
 import markerImage from '../img/currentlocation.png';
+import { AddressPickup } from './AddressPickup';
+
 
 export const NewPlaces = () => {
-  const [region, setRegion] = useState({
-    latitude: 22.332671112167628,
-    longitude: 91.84030073971839,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.001,
-  });
-
-  const markerY = useSharedValue(0);
-  const isMapPressed = useSharedValue(false);
-
+  const [location, setlocation] = useState({
+    latitude: 0,
+    longitude: 0
+  })
   useEffect(() => {
     getLiveLocation();
   }, []);
@@ -30,10 +26,10 @@ export const NewPlaces = () => {
       const locPerssionDenied = await locationPermission();
       if (locPerssionDenied) {
         const { latitude, longitude } = await getCurrentLocation();
-        setRegion({
+        setlocation({
           latitude,
           longitude,
-        });
+        })
       }
     } catch (error) {
       Alert.alert(
@@ -44,8 +40,61 @@ export const NewPlaces = () => {
     }
   };
 
+  return (
+    <SafeAreaView style={{ height: '100%' }}>
+      {
+        location.latitude && location.longitude ? (
+          <NewPlacesMap
+          location = {location}
+          />
+          
+        ): <Text>LOADING</Text>
+      }
+      <Button
+          mode="contained"
+        >
+          Submit
+        </Button>
+
+    </SafeAreaView>
+
+
+  );
+}
+const NewPlacesMap = ({location}) => {
+  const mapREf = useRef()
+  
+  const [region, setRegion] = useState({
+    latitude: location.latitude,
+    longitude: location.longitude,
+    latitudeDelta: 0.02,
+    longitudeDelta: 0.001,
+  });
+  const [curloc, setcurloc] = useState({
+    latitude: location.latitude,
+    longitude: location.longitude,
+    latitudeDelta: 0.02,
+    longitudeDelta: 0.001,
+  });
+  useEffect(() => {
+    const newCoords = {
+        latitude: curloc.latitude,
+        longitude: curloc.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+    };
+    mapREf.current?.animateToRegion(newCoords, 3000);
+}, [curloc]);
+
+
+  const markerY = useSharedValue(0);
+  const isMapPressed = useSharedValue(false);
+
+
   const onRegionChange = (newRegion) => {
+    //console.log(newRegion)
     setRegion(newRegion);
+    
   };
 
   const onPressMap = () => {
@@ -65,22 +114,38 @@ export const NewPlaces = () => {
       ],
     };
   });
+  const fetchDestinationCords = (lat, lng) => {
+    console.log("lat = ", lat)
+    
+    setRegion({latitude:lat,longitude:lng});
+    setcurloc({latitude:lat,longitude:lng})
+    console.log("lng = ", lng)
+  }
+  console.log("REGIN   = >>>\n",region)
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ height: '90%' }}>
+      <AddressPickup
+        placeholderText="Enter Destination Location"
+        fetchAddress={fetchDestinationCords} />
       <MapView
-        style={{ flex: 1, height: '50%', width: '100%' }}
+        style={{  width: '100%',height: '90%' }}
         initialRegion={region}
         onRegionChangeComplete={onRegionChange}
         onTouchStart={onPressMap}
         onTouchEnd={onReleaseMap}
-      ></MapView>
+        ref={mapREf}
+      >
+        <Marker
+          coordinate={curloc}
+          title="Drag Me!"
+          description="Your Location"
+        />
+
+      </MapView>
       <Animated.View style={[styles.markerFixed, markerStyle]}>
         <Image style={styles.marker} source={markerImage} />
       </Animated.View>
-      <SafeAreaView style={styles.footer}>
-        <Text style={styles.region}>{JSON.stringify(region, null, 2)}</Text>
-      </SafeAreaView>
     </View>
   );
 };
@@ -94,8 +159,8 @@ const styles = StyleSheet.create({
     top: '50%',
   },
   marker: {
-    height: 58,
-    width: 58,
+    height: 78,
+    width: 68,
   },
   footer: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
