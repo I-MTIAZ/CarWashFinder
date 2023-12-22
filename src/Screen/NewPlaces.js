@@ -1,25 +1,39 @@
-import React, { useEffect, useState,useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Text, Alert, Image, SafeAreaView } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { locationPermission, getCurrentLocation } from '../Helperfuncton/Helperfun';
-import { Button } from 'react-native-paper';
+import { Button, TextInput } from 'react-native-paper';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import markerImage from '../img/currentlocation.png';
+import { useNavigation } from '@react-navigation/native';
 import { AddressPickup } from './AddressPickup';
+import Entypo from 'react-native-vector-icons/Entypo'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import { ALERT } from '../Constrains/ALERT';
 
 
-export const NewPlaces = () => {
+export const NewPlaces = (props) => {
+  const navigation = useNavigation();
   const [location, setlocation] = useState({
     latitude: 0,
     longitude: 0
   })
+  const [Pnumber, setPnumber] = useState();
+  const [Uname, setUname] = React.useState("");
+  const [onoff, setonoff] = useState(false)
+  const [isloading, setislaoding] = useState(true)
+  /// customAlert
+  const [alertact, setalertact] = useState({ msg: "", boll: false, icon: "", des: "" })
   useEffect(() => {
     getLiveLocation();
   }, []);
+
+  useEffect(() => {
+    setislaoding(false)
+  }, [location]);
 
   const getLiveLocation = async () => {
     try {
@@ -30,6 +44,8 @@ export const NewPlaces = () => {
           latitude,
           longitude,
         })
+        
+
       }
     } catch (error) {
       Alert.alert(
@@ -39,31 +55,109 @@ export const NewPlaces = () => {
       );
     }
   };
+  const handleonoff = () => {
+
+    if (Pnumber !== '' && Uname !== '') {
+      if (location.latitude && location.longitude) {
+        setonoff(true)
+      }
+      else {
+        setalertact({ msg: 'Error Fetch Location', bull: true, icon: "alert", des: "" })
+      }
+    }
+    else {
+      setalertact({ msg: 'Field is Blanked', bull: true, icon: "alert", des: "" })
+      setPnumber('')
+      setUname('')
+    }
+
+
+  }
+  const hidevisible = (val) => {
+    setalertact({ msg: "", bull: false, icon: "", des: "" })
+  }
+  //fianl submit button
+  const selectedlocation = () => {
+    setalertact({ msg: "Your Placess is Found ", bull: true, icon: "check-circle", des: "" })
+    //navigation.goBack();
+  }
+  const fetchlocation = (val) => {
+    console.log("chesse " + val.latitude + val.longitude)
+  }
+
 
   return (
-    <SafeAreaView style={{ height: '100%' }}>
+    <SafeAreaView style={{ flex: 1, }}>
       {
-        location.latitude && location.longitude ? (
-          <NewPlacesMap
-          location = {location}
-          />
-          
-        ): <Text>LOADING</Text>
+        !onoff ? (
+          <View style={{ margin: '5%', marginVertical: '20%' }}>
+            <TextInput
+              label="Enter Your Phone Number"
+              value={Pnumber}
+              onChangeText={Pnumber => setPnumber(Pnumber)}
+              mode='outlined'
+              style={{ marginVertical: '4%' }}
+
+            />
+            <TextInput
+              label="Enter Your Name"
+              value={Uname}
+              onChangeText={Uname => setUname(Uname)}
+              mode="outlined"
+              style={{ marginVertical: '4%' }}
+            />
+
+            <Button
+              mode="contained"
+              icon={({ color, size }) => (
+                <Entypo name='direction' color={color} size={30} />
+              )}
+              style={{ marginVertical: '4%', height: 60, justifyContent: "center" }}
+              onPress={handleonoff}
+              loading={isloading}
+              disabled={isloading}
+            >
+              Choose Location
+            </Button>
+
+          </View>
+        ) : null
       }
-      <Button
-          mode="contained"
-        >
-          Submit
-        </Button>
+      {
+        location.latitude && location.longitude && onoff ? (
+          <View>
+            <NewPlacesMap
+              location={location}
+              fetchlocation={fetchlocation}
+            />
+            <Button
+              mode="contained"
+              onPress={selectedlocation}
+            >
+              Submit
+            </Button>
+          </View>
+
+        ) : null
+      }
+      {
+        alertact ? (
+          <ALERT
+            visible={alertact}
+            hidevisible={hidevisible}
+          />
+        ) : null
+      }
+
 
     </SafeAreaView>
 
 
   );
 }
-const NewPlacesMap = ({location}) => {
+const NewPlacesMap = ({ location, fetchlocation }) => {
   const mapREf = useRef()
-  
+
   const [region, setRegion] = useState({
     latitude: location.latitude,
     longitude: location.longitude,
@@ -78,13 +172,13 @@ const NewPlacesMap = ({location}) => {
   });
   useEffect(() => {
     const newCoords = {
-        latitude: curloc.latitude,
-        longitude: curloc.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+      latitude: curloc.latitude,
+      longitude: curloc.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
     };
     mapREf.current?.animateToRegion(newCoords, 3000);
-}, [curloc]);
+  }, [curloc]);
 
 
   const markerY = useSharedValue(0);
@@ -94,7 +188,8 @@ const NewPlacesMap = ({location}) => {
   const onRegionChange = (newRegion) => {
     //console.log(newRegion)
     setRegion(newRegion);
-    
+    fetchlocation(newRegion)
+
   };
 
   const onPressMap = () => {
@@ -116,12 +211,12 @@ const NewPlacesMap = ({location}) => {
   });
   const fetchDestinationCords = (lat, lng) => {
     console.log("lat = ", lat)
-    
-    setRegion({latitude:lat,longitude:lng});
-    setcurloc({latitude:lat,longitude:lng})
-    console.log("lng = ", lng)
+
+    setRegion({ latitude: lat, longitude: lng });
+    setcurloc({ latitude: lat, longitude: lng })
+    //console.log("lng = ", lng)
   }
-  console.log("REGIN   = >>>\n",region)
+  //console.log("REGIN   = >>>\n", region)
 
   return (
     <View style={{ height: '90%' }}>
@@ -129,7 +224,7 @@ const NewPlacesMap = ({location}) => {
         placeholderText="Enter Destination Location"
         fetchAddress={fetchDestinationCords} />
       <MapView
-        style={{  width: '100%',height: '90%' }}
+        style={{ width: '100%', height: '90%' }}
         initialRegion={region}
         onRegionChangeComplete={onRegionChange}
         onTouchStart={onPressMap}
@@ -138,13 +233,21 @@ const NewPlacesMap = ({location}) => {
       >
         <Marker
           coordinate={curloc}
-          title="Drag Me!"
-          description="Your Location"
-        />
+        >
+          <View >
+            <Text>
+              <Ionicons name="woman" size={50} color="#DD237F" />
+            </Text>
+          </View>
+        </Marker>
 
       </MapView>
       <Animated.View style={[styles.markerFixed, markerStyle]}>
-        <Image style={styles.marker} source={markerImage} />
+        <View style={styles.marker}>
+          <Text>
+            <Entypo name="location-pin" size={45} color="black" />
+          </Text>
+        </View>
       </Animated.View>
     </View>
   );

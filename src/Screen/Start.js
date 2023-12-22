@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, Alert } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Alert } from 'react-native';
 import { COLOR } from '../Constrains/COLOR';
 import CustomBtn from './CustomBtn';
 import { LogBox } from 'react-native';
@@ -11,6 +11,9 @@ import * as Keychain from "react-native-keychain";
 import { CommonActions } from '@react-navigation/native';
 import { NETINFO } from "./NETINFO"
 import Spinner from 'react-native-loading-spinner-overlay';
+import { Button, TextInput } from 'react-native-paper';
+
+
 
 
 LogBox.ignoreLogs([
@@ -22,6 +25,8 @@ LogBox.ignoreLogs([
 
 export const Start = (props) => {
   const [destlocation, setdestlocation] = useState({});
+  //
+  const [isloading, setislaoding] = useState(true)
   //console.log("from start")
 
   const fetchData = async () => {
@@ -37,6 +42,7 @@ export const Start = (props) => {
         };
       });
       setdestlocation(informationdata);
+      setislaoding(false)
     } catch (error) {
       console.log('Error fetching location data:', error);
       if (error.response) {
@@ -58,26 +64,20 @@ export const Start = (props) => {
 
   const [act, setact] = useState(true)
   const onDone = () => {
-    // Set a timeout of 3000 milliseconds (3 seconds)
-    setact(false)
-    action()
-
+    props.navigation.navigate('MAP', { destlocation, data: props.route.params });
   };
 
-  const action = () => {
+  useEffect( () => {
     setTimeout(() => {
-      if (!destlocation.length > 0) {
+      if (destlocation.length <= 0) {
         Alert.alert(
           'Data Not Fetched, Location data has not been fetched yet.',
           'wait for loading if takes too much time restart the process, it will handled in design process',
           [{ text: 'OK', onPress: fetchData }])
 
-      } else {
-        setact(true)
-        props.navigation.navigate('MAP', { destlocation, data: props.route.params });
-      }
+      } 
     }, 5000); // Adjust the timeout duration as needed (in milliseconds)
-  }
+  },[]);
 
 
   const handleLogout = async () => {
@@ -124,7 +124,7 @@ export const Start = (props) => {
 
   }
 
-  const handlenewplace = ()=>{
+  const handlenewplace = () => {
     props.navigation.navigate('NPLACE')
   }
 
@@ -136,23 +136,41 @@ export const Start = (props) => {
       {
         act ? (
           <View>
-            <View>
-              <CustomBtn
-                btnText="Start"
-                btnStyle={{ backgroundColor: COLOR.SeaGreen }}
-                onPress={onDone}
-                
-              />
-            </View>
-            <View style={styles.gap}></View>
-            <Button title='logout' onPress={handleLogout}/>
-            <View style={styles.gap}></View>
-            <Button title='Delete Account' onPress={handleDeleteaccount}  />
-            <View style={styles.gap}></View>
             <Button
-              title='Add New Parking'
+              mode="contained"
+              style={{ marginVertical: '4%', height: 60, justifyContent: "center"}}
+              onPress={onDone}
+              buttonColor='#068D87'
+              labelStyle={{
+                fontSize: 20, // Adjust the font size as needed
+                fontWeight: 'bold', // Use 'bold' for bold text
+              }}
+              loading={isloading}
+              disabled={isloading}
+            >
+              Go
+            </Button>
+            <Button
+              mode="contained"
+              style={{ marginVertical: '4%', height: 60, justifyContent: "center" }}
+              onPress={handleLogout}
+            >
+              Logout
+            </Button>
+            <Button
+              mode="contained"
+              style={{ marginVertical: '4%', height: 60, justifyContent: "center" }}
+              onPress={handleDeleteaccount}
+            >
+              Delete Account
+            </Button>
+            <Button
+              mode="contained"
+              style={{ marginVertical: '4%', height: 60, justifyContent: "center" }}
               onPress={handlenewplace}
-            />
+            >
+              Add New Parking
+            </Button>
           </View>
         ) : (<View>
           <Spinner
@@ -176,7 +194,7 @@ const styles = StyleSheet.create({
   text_p: {
     fontSize: 20,
   },
-  gap:{
-    marginVertical:15
+  gap: {
+    marginVertical: 15
   }
 });

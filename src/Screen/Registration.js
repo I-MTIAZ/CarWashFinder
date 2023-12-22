@@ -56,10 +56,19 @@ export const Registration = (props) => {
             // Registration successful
             Keychain.setGenericPassword(email, password);
             // Pass credentials to START screen and prevent going back
-            props.navigation.dispatch(CommonActions.navigate({
+            /* props.navigation.dispatch(CommonActions.navigate({
               name: 'DrawNev',
               params: email,
-            }));
+            })); */
+            props.navigation.dispatch(CommonActions.reset({
+              index: 0,
+              routes: [
+                  {
+                      name: 'DrawNev',
+                      params: email,
+                  },
+              ],
+          }));
           }
         })
         .catch(error => {
