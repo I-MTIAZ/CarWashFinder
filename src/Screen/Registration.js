@@ -64,7 +64,7 @@ export const Registration = (props) => {
               index: 0,
               routes: [
                   {
-                      name: 'DrawNev',
+                      name: 'BtabNev',
                       params: email,
                   },
               ],

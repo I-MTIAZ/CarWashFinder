@@ -11,7 +11,7 @@ import { DataBase } from "../Constrains/GoogleApi";
 export const Review = ({ value, close_btn,location,username }) => {
     const [star, setStar] = useState()
     const [textInput, setTextInput] = useState('');
-    console.log(username)
+    //console.log(username)
    
     const HAHA = (a) => {
         setStar(a)

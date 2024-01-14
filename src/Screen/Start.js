@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Alert } from 'react-native';
-import { COLOR } from '../Constrains/COLOR';
-import CustomBtn from './CustomBtn';
+import { View, StyleSheet, Text, TouchableOpacity, Alert, Dimensions, SafeAreaView, Platform } from 'react-native';
+
 import { LogBox } from 'react-native';
 import axios from 'axios';
-import { DESTINATION } from './Destination';
-import { Review } from './Review';
+
+
 import { DataBase } from '../Constrains/GoogleApi';
-import * as Keychain from "react-native-keychain";
-import { CommonActions } from '@react-navigation/native';
 import { NETINFO } from "./NETINFO"
 import Spinner from 'react-native-loading-spinner-overlay';
 import { Button, TextInput } from 'react-native-paper';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
+import Feather from 'react-native-vector-icons/Feather'  //package
+import Fontisto from 'react-native-vector-icons/Fontisto'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons' // cash-plus  qrcode-scan
 
 
+
+const { height } = Dimensions.get("window");
+
+const btncolor = "#00674b"
+const Fontsize = height/40
+const Fontweight = 'bold'
+const Fontfamily = ""
+const MODE = "outlined"
+const logosize = height/25
 
 
 LogBox.ignoreLogs([
@@ -24,6 +35,8 @@ LogBox.ignoreLogs([
 
 
 export const Start = (props) => {
+
+
   const [destlocation, setdestlocation] = useState({});
   //
   const [isloading, setislaoding] = useState(true)
@@ -62,12 +75,18 @@ export const Start = (props) => {
   }, []); // Fetch data when the component mounts
 
 
-  const [act, setact] = useState(true)
-  const onDone = () => {
+
+  //previous react native MAP
+  /* const onDone = () => {
     props.navigation.navigate('MAP', { destlocation, data: props.route.params });
+  }; */
+
+  // Connect With Google MAP
+  const onDone = () => {
+    props.navigation.navigate('GMAPTwo', { destlocation, data: props.route.params });
   };
 
-  useEffect( () => {
+  useEffect(() => {
     setTimeout(() => {
       if (destlocation.length <= 0) {
         Alert.alert(
@@ -75,126 +94,123 @@ export const Start = (props) => {
           'wait for loading if takes too much time restart the process, it will handled in design process',
           [{ text: 'OK', onPress: fetchData }])
 
-      } 
+      }
     }, 5000); // Adjust the timeout duration as needed (in milliseconds)
-  },[]);
+  }, []);
 
 
-  const handleLogout = async () => {
-    const logout = await Keychain.resetGenericPassword();
-    console.log({ logout });
-    props.navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'WELCOME',
-          },
-        ],
-      })
-    );
-  };
 
-  const handleDeleteaccount = () => {
-    Alert.alert(
-      'Are you sure deleteing Acoount', '',
 
-      [{ text: 'YES', onPress: Delete_Act }, { text: 'NO' }]
 
-    );
-  }
-
-  const Delete_Act = () => {
-    const email = props.route.params; // Replace with the actual email
-
-    axios
-      .delete(`${DataBase}/deleteAccount/${email}`)
-      .then((response) => {
-        if (response.status === 200) {
-          Alert.alert('Success', 'Account deleted successfully');
-          handleLogout()
-        } else {
-          Alert.alert('Error', 'Something went wrong');
-        }
-      })
-      .catch((error) => {
-        console.log('Error:', error);
-        Alert.alert('Error', 'Something went wrong');
-      });
-
-  }
 
   const handlenewplace = () => {
     props.navigation.navigate('NPLACE')
   }
+  const handleqrcode = () => {
+    props.navigation.navigate('QRSCAN')
+  }
+
+  const handlerecharge = () => {
+    props.navigation.navigate('GETRECHARGE')
+  }
+  const handlebuypackage = () => {
+    props.navigation.navigate('BUYPACKAGE')
+  }
+
 
 
 
   return (
-    <View style={{ flex: 1 }}>
-      <NETINFO />
-      {
-        act ? (
-          <View>
-            <Button
-              mode="contained"
-              style={{ marginVertical: '4%', height: 60, justifyContent: "center"}}
-              onPress={onDone}
-              buttonColor='#068D87'
-              labelStyle={{
-                fontSize: 20, // Adjust the font size as needed
-                fontWeight: 'bold', // Use 'bold' for bold text
-              }}
-              loading={isloading}
-              disabled={isloading}
-            >
-              Go
-            </Button>
-            <Button
-              mode="contained"
-              style={{ marginVertical: '4%', height: 60, justifyContent: "center" }}
-              onPress={handleLogout}
-            >
-              Logout
-            </Button>
-            <Button
-              mode="contained"
-              style={{ marginVertical: '4%', height: 60, justifyContent: "center" }}
-              onPress={handleDeleteaccount}
-            >
-              Delete Account
-            </Button>
-            <Button
-              mode="contained"
-              style={{ marginVertical: '4%', height: 60, justifyContent: "center" }}
-              onPress={handlenewplace}
-            >
-              Add New Parking
-            </Button>
-          </View>
-        ) : (<View>
-          <Spinner
-            visible={true}
-            textContent={'Loading...'}
-            textStyle={styles.spinnerText}
-          />
-        </View>)
-      }
-    </View>
+    <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? 0 : 0 }}>
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <NETINFO />
+        <View style={{ margin: height / 45 }}>
+          
+
+          <Button
+            mode={MODE}
+            style={styles.btn}
+            onPress={onDone}
+            contentStyle={{ flexDirection: 'row', alignItems: 'center', marginLeft: '10%', justifyContent: 'flex-start', padding: 0, }}
+            labelStyle={{
+              fontSize: Fontsize, // Adjust the font size as needed
+              fontWeight: Fontweight, // Use 'bold' for bold text
+              color: btncolor,
+              fontFamily: Fontfamily,
+              margin:0,
+              padding:0
+            }}
+            icon={({ size, color }) => (
+              <Feather name="map" size={logosize} color={btncolor} />
+            )}
+            loading={isloading}
+            disabled={isloading}
+            theme={{ roundness: 3 }} 
+          >
+            Go to Map
+          </Button>
+
+          <TouchableOpacity onPress={handlenewplace} style={styles.btntou}>
+          <MaterialIcons name="add-location-alt" size={logosize} color={btncolor} />
+            <View style={{ marginLeft: '2%' }}>
+              <Text style={styles.btn_txt}>Add New Parking</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleqrcode} style={styles.btntou}>
+          <MaterialCommunityIcons name="qrcode-scan" size={logosize} color={btncolor} />
+            <View style={{ marginLeft: '2%' }}>
+              <Text style={styles.btn_txt}>QrCode Scanner</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handlerecharge} style={styles.btntou}>
+          <MaterialCommunityIcons name="cash-plus" size={logosize} color={btncolor} />
+            <View style={{ marginLeft: '2%' }}>
+              <Text style={styles.btn_txt}>Get Recharge</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handlebuypackage} style={styles.btntou}>
+          <Fontisto name="shopping-package" size={logosize} color={btncolor} />
+            <View style={{ marginLeft: '2%' }}>
+              <Text style={styles.btn_txt}> Buy Package</Text>
+            </View>
+          </TouchableOpacity>
+
+        </View>
+
+
+      </View>
+    </SafeAreaView>
   );
 };
 
 
 const styles = StyleSheet.create({
-  text_h: {
-    fontSize: 40,
-    textAlign: "center",
-    fontWeight: "bold"
+
+  btn: {
+    marginVertical: height/45,
+    height: height / 11,
+    justifyContent: "center",
   },
-  text_p: {
-    fontSize: 20,
-  },
-  gap: {
-    marginVertical: 15
-  }
+  btntou: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: height / 11,
+    paddingLeft: height / 30,
+    borderRadius:15,
+    borderColor:'black',
+    borderWidth:0.5,
+    //justifyContent:"center",
+    marginVertical: height/45,
+    paddingLeft:height/15
+},
+btn_txt:{
+  color:btncolor,
+  fontSize:Fontsize,
+  fontWeight: Fontweight,
+  fontFamily:Fontfamily
+}
 });
+
