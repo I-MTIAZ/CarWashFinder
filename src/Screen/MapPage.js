@@ -11,6 +11,8 @@ import { COLOR } from '../Constrains/COLOR';
 import { ListPages } from './ListPages';
 import { Review } from './Review';
 import { NETINFO } from "./NETINFO"
+//import Geolocation from '@react-native-community/geolocation';
+
 
 
 const screen = Dimensions.get('window');
@@ -20,7 +22,7 @@ const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 
 export const MapPage = (props) => {
-    console.log("i Am MAP PAGE")
+  
     const mapRef = useRef()
     const markerRef = useRef()
     //console.log(props.route.params.data)
@@ -34,7 +36,7 @@ export const MapPage = (props) => {
     const [review, setreview] = useState(false)
 
     const information = props.route.params.destlocation
-    console.log(information)
+    //console.log(information)
 
     // save current distance
     const [crnt_distance, set_crnt_distace] = useState('')
@@ -80,58 +82,66 @@ export const MapPage = (props) => {
    }, []); */
 
 
-
+    const [locpermit, setlocpermit] = useState(false)
     // GET LIVE Location
     useEffect(() => {
         // Call getLiveLocation immediately when the component mounts
+        const requestLocationPermission = async () => {
+            const locPerssionDenied = await locationPermission()
+            if (locPerssionDenied) {
+                setlocpermit(locPerssionDenied)
+            }
+            else {
+                console.log("error")
+            }
+
+        }
         getLiveLocation();
     }, []);
 
     const getLiveLocation = async () => {
         try {
-            const locPerssionDenied = await locationPermission();
-            if (locPerssionDenied) {
-                const { latitude, longitude } = await getCurrentLocation();
-                console.log("get location after 5 seconds => ", latitude, " and ", longitude);
-                animate(latitude, longitude)
-                const point_A = {
+
+            const { latitude, longitude } = await getCurrentLocation();
+            console.log("get location after 5 seconds => ", latitude, " and ", longitude);
+            animate(latitude, longitude)
+            const point_A = {
+                latitude: latitude,
+                longitude: longitude
+            }
+            setSate({
+                ...state,
+                curLoc: {
                     latitude: latitude,
                     longitude: longitude
-                }
-                setSate({
-                    ...state,
-                    curLoc: {
-                        latitude: latitude,
-                        longitude: longitude
-                    },
-                    coordinate: new AnimatedRegion({
-                        latitude: latitude,
-                        longitude: longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.1,
-                    })
+                },
+                coordinate: new AnimatedRegion({
+                    latitude: latitude,
+                    longitude: longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.1,
                 })
+            })
+            if (locCall) {
 
-                if (locCall) {
+                const dist = await getDistanceAndDuration(point_A, savea_Place)
+                //console.log("==============", dist.distance)
+                set_crnt_distace(dist.distance)
+                if (dist.distance < 15) {
+                    console.log("i am distance == ", dist.distance);
 
-                    const dist = await getDistanceAndDuration(point_A, savea_Place)
-                    //console.log("==============", dist.distance)
-                    set_crnt_distace(dist.distance)
-                    if (dist.distance < 15) {
-                        console.log("i am distance == ", dist.distance);
+                    // Set a timeout to trigger setReview(true) after 15 seconds
+                    const timeoutId = setTimeout(() => {
+                        setreview(true);
+                        cancleRoute()
+                    }, 15000);
 
-                        // Set a timeout to trigger setReview(true) after 15 seconds
-                        const timeoutId = setTimeout(() => {
-                            setreview(true);
-                            cancleRoute()
-                        }, 15000);
-
-                        // Clear the timeout if the component unmounts or if distance becomes >= 5 before 15 seconds
-                        return () => clearTimeout(timeoutId);
-                    }
-
+                    // Clear the timeout if the component unmounts or if distance becomes >= 5 before 15 seconds
+                    return () => clearTimeout(timeoutId);
                 }
+
             }
+
 
         } catch (error) {
             // Handle the error or rejection here
@@ -145,7 +155,34 @@ export const MapPage = (props) => {
             // You might want to set a state or show a message to the user
         }
     }
+    //************************** *///************************** */
+    //************************** */
+    //************************** */  UNDER CONSTRUCTION
+    //************************** */
+    /* const [latestLocation, setLatestLocation] = useState(null);
 
+    useEffect(() => {
+        const watchID = Geolocation.watchPosition(
+            position => {
+                const { latitude, longitude } = position.coords;
+                console.log("here i am working ",latitude, longitude);
+
+                // Update the latest location without causing a re-render
+            },
+            error => console.log(error),
+            { enableHighAccuracy: false, timeout: 2000, maximumAge: 1000, distanceFilter: 5 }
+        );
+
+        // Cleanup the watchPosition when the component is unmounted
+        return () => {
+            Geolocation.clearWatch(watchID);
+        };
+    }, []); */ 
+
+     //************************** *///************************** */
+    //************************** */
+    //************************** */  UNDER CONSTRUCTION
+    //************************** */
 
 
 
@@ -154,7 +191,7 @@ export const MapPage = (props) => {
         if (locCall && onNetworkChange) {
             intervalId = setInterval(() => {
                 getLiveLocation();
-            }, 6000);
+            }, 3000);
         }
 
         return () => {
@@ -163,10 +200,10 @@ export const MapPage = (props) => {
             }
         };
     }, [locCall]);
-    const onNetworkChange = (val)=>{
-        console.log("from map page check internet is active = ",val)
-        if(val == false) 
-        props.navigation.navigate('START')
+    const onNetworkChange = (val) => {
+        console.log("from map page check internet is active = ", val)
+        if (val == false)
+            props.navigation.navigate('START')
     }
 
 
@@ -194,15 +231,15 @@ export const MapPage = (props) => {
 
     // for mapref start for first time
 
-    /*   useEffect(() => {
-          const newCoords = {
-              latitude: curLoc.latitude,
-              longitude: curLoc.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-          };
-          mapRef.current?.animateToRegion(newCoords, 5000);
-      }, [curLoc]); */
+    /* useEffect(() => {
+        const newCoords = {
+            latitude: curLoc.latitude,
+            longitude: curLoc.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+        };
+        mapRef.current?.animateToRegion(newCoords, 5000);
+    }, []); */
     const onCenter = () => {
         mapRef.current.animateToRegion({
             latitude: curLoc.latitude,
@@ -210,6 +247,8 @@ export const MapPage = (props) => {
             latitudeDelta: 0.009,
             longitudeDelta: 0.009
         })
+        /* getLiveLocation()
+        console.log(curLoc.latitude + " "+ curLoc.longitude) */
     }
 
 
@@ -399,18 +438,18 @@ export const MapPage = (props) => {
     const review_close_btn = (val) => {
         setreview(val)
     }
-   /*  const onNetworkChange = (val)=>{
-        console.log("from map page check internet is active = ",val)
-        if(val == false) 
-        props.navigation.navigate('START')
-    } */
+    /*  const onNetworkChange = (val)=>{
+         console.log("from map page check internet is active = ",val)
+         if(val == false) 
+         props.navigation.navigate('START')
+     } */
 
 
 
 
     return (
         <View style={{ flex: 1 }}>
-             <NETINFO onNetworkChange={onNetworkChange} />
+            <NETINFO onNetworkChange={onNetworkChange} />
             <MapView style={{ height: mapRoute ? '60%' : '90%', width: '100%', marginBottom: 15 }}
                 initialRegion={curLoc}
                 ref={mapRef}
