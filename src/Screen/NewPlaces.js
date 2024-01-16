@@ -13,6 +13,8 @@ import { AddressPickup } from './AddressPickup';
 import Entypo from 'react-native-vector-icons/Entypo'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { ALERT } from '../Constrains/ALERT';
+import { DataBase } from '../Constrains/GoogleApi';
+import axios from 'axios';
 
 
 export const NewPlaces = (props) => {
@@ -21,10 +23,12 @@ export const NewPlaces = (props) => {
     latitude: 0,
     longitude: 0
   })
-  const [Pnumber, setPnumber] = useState();
+  const [Pnumber, setPnumber] = useState("");
   const [Uname, setUname] = React.useState("");
+  const[Placename,setPlacename]=useState("");
   const [onoff, setonoff] = useState(false)
   const [isloading, setislaoding] = useState(true)
+  const[addreSS,setaddreSS]=useState({})
   /// customAlert
   const [alertact, setalertact] = useState({ msg: "", boll: false, icon: "", des: "" })
   useEffect(() => {
@@ -69,20 +73,40 @@ export const NewPlaces = (props) => {
       setalertact({ msg: 'Field is Blanked', bull: true, icon: "alert", des: "" })
       setPnumber('')
       setUname('')
+      setPlacename('')
     }
 
 
   }
   const hidevisible = (val) => {
-    setalertact({ msg: "", bull: false, icon: "", des: "" })
+    setalertact({ msg: "", bull: false, icon: "", des: "we will contact you soon" })
   }
   //fianl submit button
   const selectedlocation = () => {
-    setalertact({ msg: "Your Placess is Found ", bull: true, icon: "check-circle", des: "" })
+    setalertact({ msg: "Your Placess is Found ", bull: true, icon: "check-circle", des:''})
+    console.log(Uname, " ",Pnumber+1, " ", Placename," ",addreSS.latitude,)
+    
+    
+    axios.post(`${DataBase}/insertLocation`, {
+      Name: Uname,
+      Phone: Pnumber,
+      Locationname:Placename,
+      lat:addreSS.latitude,
+      lang:addreSS.longitude
+    })
+      .then(response => { 
+        console.log('Insert New Location successfully:', response.data);
+      })
+      .catch(error => {
+        Alert.alert('Error submitting New Location:', error);
+        // Handle error accordingly
+      });
     //navigation.goBack();
+    
   }
   const fetchlocation = (val) => {
     console.log("chesse " + val.latitude + val.longitude)
+    setaddreSS(val)
   }
 
 
@@ -94,6 +118,7 @@ export const NewPlaces = (props) => {
             <TextInput
               label="Enter Your Phone Number"
               value={Pnumber}
+              keyboardType="number-pad"
               onChangeText={Pnumber => setPnumber(Pnumber)}
               mode='outlined'
               style={{ marginVertical: '4%' }}
@@ -103,6 +128,13 @@ export const NewPlaces = (props) => {
               label="Enter Your Name"
               value={Uname}
               onChangeText={Uname => setUname(Uname)}
+              mode="outlined"
+              style={{ marginVertical: '4%' }}
+            />
+            <TextInput
+              label="Enter Your Place Name"
+              value={Placename}
+              onChangeText={Placename => setPlacename(Placename)}
               mode="outlined"
               style={{ marginVertical: '4%' }}
             />
@@ -221,7 +253,7 @@ const NewPlacesMap = ({ location, fetchlocation }) => {
   return (
     <View style={{ height: '90%' }}>
       <AddressPickup
-        placeholderText="Enter Destination Location"
+        placeholderText="Enter Destination Location" 
         fetchAddress={fetchDestinationCords} />
       <MapView
         style={{ width: '100%', height: '90%' }}

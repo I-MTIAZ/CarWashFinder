@@ -43,7 +43,7 @@ export const MODAL = ({ value, close_btn, confirm_btn, routedistance, locationam
                                     act_rev ? (
                                         <View style={{ flex: 1 }}>
                                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                                <Text style={{ textAlign: "center", fontSize: 25, fontWeight: "bold",color:"white" }}>{locationame}</Text>
+                                                <Text style={{ textAlign: "center", fontSize: 25, fontWeight: "bold", color: "white" }}>{locationame}</Text>
                                                 <TouchableOpacity
                                                     style={{
                                                         height: 50,
@@ -59,7 +59,7 @@ export const MODAL = ({ value, close_btn, confirm_btn, routedistance, locationam
                                             </View>
 
                                             <All_Review
-                                            locationname = {locationame}
+                                                locationname={locationame}
                                             />
                                         </View>
 

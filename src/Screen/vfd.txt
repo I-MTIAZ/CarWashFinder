@@ -1,0 +1,55 @@
+
+<SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? '2%' : 0 }}>
+
+<View style={{ flex: 1 }}>
+
+
+{/* <View style={styles.rev}>
+                            <Text style={styles.rev_txt} >Cleaness</Text>
+                            <AirbnbRating
+                                count={5}
+                                defaultRating={0}
+                                size={SIZE}
+                                onFinishRating={(rat) => setclean(rat)}
+                                reviewSize={Revsize}
+                                starImage={require('../img/ratt.jpg')}
+                                selectedColor={Revcolor}
+                                reviews={[]}
+                                reviewColor={Revcolor}
+                                ratingContainerStyle={{ marginTop: -55 }}
+
+                            />
+
+                            <Text style={styles.rev_txt} >Cleaness</Text>
+                            <AirbnbRating
+                                count={5}
+                                defaultRating={0}
+                                size={SIZE}
+                                onFinishRating={(rat) => sethygiene(rat)}
+                                reviewSize={Revsize}
+                                starImage={require('../img/ratt.jpg')}
+                                selectedColor={Revcolor}
+                                reviews={[]}
+                                reviewColor={Revcolor}
+                                ratingContainerStyle={{ marginTop: -55 }}
+
+                            />
+
+                            <Text style={styles.rev_txt} >Cleaness</Text>
+                            <AirbnbRating
+                                count={5}
+                                defaultRating={0}
+                                size={SIZE}
+                                onFinishRating={(rat) => setsecure(rat)}
+                                reviewSize={Revsize}
+                                starImage={require('../img/ratt.jpg')}
+                                selectedColor={Revcolor}
+                                reviews={[]}
+                                reviewColor={Revcolor}
+                                ratingContainerStyle={{ marginTop: -55 }}
+
+                            />
+                        </View> */}
+                        ratingImage={require('../img/ratt.jpg')}
+
+                        ./gradlew assembleRelease

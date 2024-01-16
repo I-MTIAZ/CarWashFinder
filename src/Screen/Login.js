@@ -36,7 +36,7 @@ export const Login = (props) => {
                         index: 0,
                         routes: [
                             {
-                                name: 'DrawNev',
+                                name: 'BtabNev',
                                 params: credentials.username,
                             },
                         ],
@@ -70,7 +70,7 @@ export const Login = (props) => {
                     index: 0,
                     routes: [
                         {
-                            name: 'DrawNev',
+                            name: 'BtabNev',
                             params: email,
                         },
                     ],

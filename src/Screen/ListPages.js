@@ -36,7 +36,7 @@ export const ListPages = ({ provideinfo, funcformodalopen }) => {
     }
 
     return (
-        <BottomSheet isOpen wrapperStyle={{backgroundColor:"#EEEEEE"}}>
+        <BottomSheet isOpen wrapperStyle={{backgroundColor:"#CCCBCB"}}>
             <ScrollView>
             {locationdist.length > 0 ? (
                 <View style={{ alignItems: "center" }}>
