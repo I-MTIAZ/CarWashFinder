@@ -45,14 +45,16 @@ export const Review = ({ value, close_btn, location, username }) => {
     //console.log(textInput)
 
     const submitReview = () => {
+        const ratings = ((clean+hygiene+secure)/3)
 
         if(clean === 0 || hygiene === 0  || secure === 0  )
         {
             onToggleSnackBar()
         }
-        // Make a POST request to insert a new review on the server
-        /* axios.post(`${DataBase}/insertReview`, {
-            star: star,
+        else{
+            // Make a POST request to insert a new review on the server
+        axios.post(`${DataBase}/insertReview`, {
+            star: ratings,
             text: textInput,
             location: location.titles,
             uname: username
@@ -64,10 +66,12 @@ export const Review = ({ value, close_btn, location, username }) => {
                 Alert.alert('Error submitting review:', error);
                 // Handle error accordingly
             });
-        close_btn(false); */
-        console.log(clean,hygiene,secure)
+        close_btn(false);
+        /* console.log(clean,hygiene,secure)
         console.log(clean+hygiene+secure)
         console.log((clean+hygiene+secure)/3)
+        console.log(ratings) */
+        }
     };
     const closebtn = () => {
         close_btn(false);

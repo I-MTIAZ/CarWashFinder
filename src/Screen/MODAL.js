@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Modal, Text, TouchableOpacity } from 'react-native';
-import CustomBtn from './CustomBtn';
-import { COLOR } from '../Constrains/COLOR';
-import { Rating, AirbnbRating } from 'react-native-ratings';
-const transparent = 'rgba(0,0,0,0.5)'
+import { View, StyleSheet, Modal, Text, TouchableOpacity, Dimensions, SafeAreaView } from 'react-native';
+import { Colorf } from '../Constrains/COLOR';
+import { AirbnbRating } from 'react-native-ratings';
+import { Button } from 'react-native-paper';
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import Entypo from 'react-native-vector-icons/Entypo'
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
+
 import { All_Review } from './All_Review';
+const transparent = Colorf.b
+const { height } = Dimensions.get("window");
+const info = "is simply dummy text of the printing and typesetting industry. "
 
 export const MODAL = ({ value, close_btn, confirm_btn, routedistance, locationame, star }) => {
     const [act_rev, setact_rev] = useState(false)
@@ -25,7 +31,7 @@ export const MODAL = ({ value, close_btn, confirm_btn, routedistance, locationam
 
 
     return (
-        <View>
+        <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? '2%' : 0 }}>
             <Modal visible={value} animationType='slide' transparent={true}>
                 {
                     routedistance && locationame && star ? (
@@ -33,11 +39,8 @@ export const MODAL = ({ value, close_btn, confirm_btn, routedistance, locationam
                             <View
                                 style={{
                                     backgroundColor: transparent,
-                                    padding: 15,
-                                    width: act_rev ? '90%' : '90%',
-                                    height: act_rev ? '100%' : '70%',
-                                    borderRadius: 10,
-
+                                    width: '100%',
+                                    height: '100%'
                                 }}>
                                 {
                                     act_rev ? (
@@ -66,50 +69,89 @@ export const MODAL = ({ value, close_btn, confirm_btn, routedistance, locationam
 
 
                                     ) :
-                                        <View>
-                                            <Text style={{ fontSize: 25, color: COLOR.Snow }}>{locationame}</Text>
-                                            <Text style={{ fontSize: 20, color: COLOR.Snow, marginTop: 5 }}>Distance {routedistance.dist} meter</Text>
-                                            <Text style={{ fontSize: 20, color: COLOR.Snow, marginTop: 5 }}>Duration {routedistance.duration} minutes</Text>
-                                            <AirbnbRating
-                                                count={5}
-                                                reviews={["Bad", "OK", "Good", "Very Good", "Amazing",]}
-                                                defaultRating={star}
-                                                size={25}
-                                                starImage={require('../img/ratt.jpg')}
-                                                selectedColor="orange"
-                                                showRating={false}
-                                                isDisabled={true}
+                                        <View >
 
-                                            />
-                                            <Text style={{ fontSize: 20, color: COLOR.Snow, marginTop: 5 }}>open time : 5 am to 5 pm</Text>
-                                            <View style={{ marginTop: 20 }}>
-                                                <TouchableOpacity style={{
-                                                    height: '30%', width: '100%', backgroundColor: COLOR.Snow,
-                                                    alignItems: "center", justifyContent: "center"
-                                                }}
-                                                    onPress={() => sentclose()}
-                                                >
-                                                    <Text style={{ fontSize: 25 }}>close</Text>
 
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={{
-                                                    height: '30%', width: '100%', backgroundColor: COLOR.SeaGreen,
-                                                    alignItems: "center", justifyContent: "center", marginTop: 20
-                                                }}
-                                                    onPress={() => sentconfirm()}
-                                                >
-                                                    <Text style={{ fontSize: 25 }}>Confirm</Text>
+                                            <View style={styles.maincard}>
+                                                <Entypo name="location" size={height / 10} color={Colorf.c} />
+                                                <View style={{ justifyContent:"center",alignItems:"center"}}>
+                                                    <Text style={{ fontSize: height/22, color: Colorf.c }}>{locationame}</Text>
+                                                    <AirbnbRating
+                                                        count={5}
+                                                        defaultRating={star}
+                                                        size={height/25}
+                                                        starImage={require('../img/ratt.jpg')}
+                                                        selectedColor="orange"
+                                                        showRating={false}
+                                                        isDisabled={true}
+                                                    />
 
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={{
-                                                    alignItems: "center", justifyContent: "center", marginTop: 10
-                                                }}
-                                                    onPress={() => Showrev()}
-                                                >
-                                                    <Text style={{ fontSize: 20, color: "snow", fontWeight: "bold" }}>See Other's Review</Text>
-
-                                                </TouchableOpacity>
+                                                </View>
                                             </View>
+                                            <View style={styles.card}>
+                                                <Text style={{ fontSize: height/35, color: Colorf.c,fontWeight:"500" }}>Distance {routedistance.dist} meter</Text>
+                                                <Text style={{ fontSize: height/35, color: Colorf.c,fontWeight:"500" }}>Duration {routedistance.duration} minutes</Text>
+                                            </View>
+
+                                            <View style={styles.help_card}>
+                                                <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                                                    <AntDesign name="questioncircle" size={height / 25} color={Colorf.c} />
+                                                    <Text style={{ fontSize: height/30, color: Colorf.c,fontWeight:"400",marginVertical:'2%' }}>How To Go</Text>
+                                                </View>
+                                                <Text style={{ fontSize: height/40, color: Colorf.c,fontWeight:"500" }}>{info} </Text>
+
+                                            </View>
+
+                                            <View style={{ flexDirection: "row", justifyContent: "center", }}>
+
+                                                <Button
+                                                    icon={() => <FontAwesome6 name="map-location-dot" size={height / 35} color={Colorf.c} />}
+                                                    mode="outlined"
+                                                    onPress={() => sentconfirm()}
+                                                    style={styles.btn}
+                                                    theme={{ roundness: 2 }}
+                                                    contentStyle={{ flexDirection: "row-reverse" }}
+                                                    labelStyle={{
+                                                        fontSize: height / 35, // Adjust the font size as needed
+                                                        fontWeight: 500, // Use 'bold' for bold text
+                                                        color: Colorf.c,
+                                                        fontFamily: Colorf.f,
+                                                    }}
+                                                >
+                                                    Map
+                                                </Button>
+
+                                                <Button
+                                                    icon={() => <AntDesign name="checkcircle" size={height / 35} color={Colorf.c} />}
+                                                    mode="outlined"
+                                                    onPress={() => sentclose()}
+                                                    style={styles.btn}
+                                                    theme={{ roundness: 2 }}
+                                                    contentStyle={{ flexDirection: "row-reverse" }}
+                                                    labelStyle={{
+                                                        fontSize: height / 35, // Adjust the font size as needed
+                                                        fontWeight: 500, // Use 'bold' for bold text
+                                                        color: Colorf.c,
+                                                        fontFamily: Colorf.f,
+                                                    }}
+                                                >
+                                                    CLose
+                                                </Button>
+                                            </View>
+                                            <TouchableOpacity style={{
+                                                alignItems: "center", justifyContent: "center", marginTop: height/25
+                                            }}
+                                                onPress={() => Showrev()}
+                                            >
+                                                <View style={{ flexDirection: "row-reverse", alignItems: "center" }}>
+                                                    <Text style={{
+                                                        fontSize: height/35, color: Colorf.c, fontWeight: "700",
+                                                        marginHorizontal: '2%'
+                                                    }}>See Other's Review.</Text>
+                                                    <FontAwesome6 name="comments" size={height / 35} color={Colorf.c} />
+                                                </View>
+
+                                            </TouchableOpacity>
                                         </View>
                                 }
                             </View>
@@ -117,10 +159,51 @@ export const MODAL = ({ value, close_btn, confirm_btn, routedistance, locationam
                     ) : (<Text>wait</Text>)
                 }
             </Modal>
-        </View>
+        </SafeAreaView>
     );
 }
 
 
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+    btn: {
+        backgroundColor: "white",
+        margin: '1.5%',
+        width: height / 5,
+        marginVertical: '2%',
+    },
+    help_card: {
+        backgroundColor: "white",
+        padding: '3%',
+        marginVertical: '2%',
+        height: height / 4,
+        alignItems: "center",
+        flexDirection: "column",
+        borderRadius: 15,
+        marginLeft: '2%',
+        marginRight: '2%',
+        marginVertical: '2%',
+    },
+    card: {
+        backgroundColor: "white",
+        height: height / 8,
+        justifyContent: "center",
+        padding: 5,
+        borderRadius: 15,
+        marginLeft: '2%',
+        marginRight: '2%',
+        alignItems: "center",
+        marginBottom: '2%'
+    },
+    maincard: {
+        height: height / 4,
+        backgroundColor: Colorf.b,
+        alignItems: "center",
+        borderRadius: 15,
+        marginLeft: '2%',
+        marginRight: '2%',
+        padding: 5,
+        marginVertical: '2%',
+        justifyContent: "center"
+    }
+});
