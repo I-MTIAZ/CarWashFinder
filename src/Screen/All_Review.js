@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, Image, ActivityIndicator,Alert } from 'react-native';
-import { Rating, AirbnbRating } from 'react-native-ratings';
+import { View, StyleSheet, Text, ScrollView, Image, Alert, Dimensions,SafeAreaView } from 'react-native';
+import { AirbnbRating } from 'react-native-ratings';
 import Spinner from 'react-native-loading-spinner-overlay';
 import axios from 'axios';
 import { DataBase } from '../Constrains/GoogleApi';
+const { height } = Dimensions.get("window");
+import { Colorf } from '../Constrains/COLOR';
 
 
 
@@ -60,63 +62,68 @@ export const All_Review = ({ locationname }) => {
   console.log(reviews);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#E6E6E7" }}>
-      <View >
-        {reviews ? (
-          reviews.map((item, index) => (
-            <View key={index} style={styles.container}>
-              <View style={{ display: "flex", flexDirection: "row" }}>
-                <Image
-                  source={require("../img/user.png")}
-                  style={{ width: 35, height: 35 }}
+    <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? '2%' : 0 }}>
+      <ScrollView style={{ flex: 1, backgroundColor: Colorf.b }}>
+        <View >
+          {reviews ? (
+            reviews.map((item, index) => (
+              <View key={index} style={styles.container}>
+                <View style={{ display: "flex", flexDirection: "row" }}>
+                  <Image
+                    source={require("../img/user.png")}
+                    style={{ width: height/20, height: height/20 }}
+                    tintColor={Colorf.c}
+                  />
+                  <Text style={styles.h_txt}>{item.username}</Text>
+                </View>
+
+                <AirbnbRating
+                  count={5}
+                  defaultRating={item.star}
+                  size={height/30}
+                  starImage={require('../img/ratt.jpg')}
+                  selectedColor="black"
+                  showRating={false}
+                  isDisabled={true}
+                  ratingContainerStyle={styles.rev_display}
                 />
-                <Text style={styles.h_txt}>{item.username}</Text>
+                <Text style={{color:Colorf.c}}>{item.date}</Text>
+                <Text style={styles.p_txt}>{item.comment}</Text>
+
               </View>
-
-              <AirbnbRating
-                count={5}
-                reviews={["Bad", "OK", "Good", "Very Good", "Amazing"]}
-                defaultRating={item.star}
-                size={25}
-                starImage={require('../img/ratt.jpg')}
-                selectedColor="orange"
-                showRating={false}
-                isDisabled={true}
-                ratingContainerStyle={styles.rev_display}
+            ))
+          ) : (
+            <View>
+              <Spinner
+                visible={true}
+                textContent={'Loading...'}
+                textStyle={styles.spinnerText}
               />
-              <Text style={{}}>{item.date}</Text>
-              <Text style={styles.p_txt}>{item.comment}</Text>
-
             </View>
-          ))
-        ) : (
-          <View>
-            <Spinner
-              visible={true}
-              textContent={'Loading...'}
-              textStyle={styles.spinnerText}
-            />
-          </View>
-        )}
-      </View>
-    </ScrollView>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
 
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 12,
-    backgroundColor: "#FDFDFE",
-    marginVertical: 5
+    padding: height/45,
+    backgroundColor: "white",
+    marginVertical: '1.5%'
   },
   h_txt: {
-    fontSize: 19,
+    fontSize: height/40,
     fontWeight: "bold",
-    padding: 8,
+    padding: height/90,
+    color:Colorf.c
   },
   p_txt: {
-    fontSize: 18,
+    fontSize: height/40,
+    fontWeight:'400',
+    color:Colorf.c
   },
   rev_display: {
     alignSelf: "flex-start",

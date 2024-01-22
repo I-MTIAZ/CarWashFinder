@@ -1,22 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform, Alert, Linking } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Dimensions, Platform, Alert, Linking,SafeAreaView } from 'react-native';
 import MapView, { AnimatedRegion, Marker } from 'react-native-maps';
 
 import { useState, useRef, useEffect } from 'react';
 import { locationPermission, getCurrentLocation } from '../Helperfuncton/Helperfun'
 import { MODAL } from './MODAL';
-
 import { Google_API } from '../Constrains/GoogleApi'
 import { Review } from './Review';
 import { ListPages } from './ListPages';
-
-import { NETINFO } from "./NETINFO"
-
+import { NETINFO } from "./NETINFO";
+import { Colorf } from '../Constrains/COLOR';
 
 const screen = Dimensions.get('window');
 const ASPECT_RATIO = screen.width / screen.height;
 const LATITUDE_DELTA = 0.04;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+const { height } = Dimensions.get("window");
 
 
 export const TypeTwogMap = (props) => {
@@ -38,8 +37,7 @@ export const TypeTwogMap = (props) => {
   const information = props.route.params.destlocation
   //console.log(information)
 
-  // save current distance
-  const [crnt_distance, set_crnt_distace] = useState('')
+  
 
   const [state, setSate] = useState({
     // austria address 48.31864026223389, 14.278368460116216
@@ -138,9 +136,6 @@ export const TypeTwogMap = (props) => {
       props.navigation.navigate('START')
   }
 
-
-
-  // console.log("Current distance------------------>", crnt_distance)
 
   // save a place's latitude and longitude
   const [savea_Place, setSaveaPlace] = useState({})
@@ -363,7 +358,7 @@ export const TypeTwogMap = (props) => {
     }
   };
 
- 
+
   /*  const onNetworkChange = (val)=>{
        console.log("from map page check internet is active = ",val)
        if(val == false) 
@@ -374,93 +369,96 @@ export const TypeTwogMap = (props) => {
 
 
   return (
-    <View style={{ flex: 1 }}>
-      <NETINFO onNetworkChange={onNetworkChange} />
-      <MapView style={{ height: mapRoute ? '60%' : '90%', width: '100%', marginBottom: 15 }}
-        initialRegion={curLoc}
-        ref={mapRef}
-      >
-
-
-        <Marker.Animated
-          ref={markerRef}
-          coordinate={coordinate}
+    <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? '0%' : 0 }}>
+      <View style={{ flex: 1 }}>
+        <NETINFO onNetworkChange={onNetworkChange} />
+        <MapView style={{ height: '95%', width: '100%', }}
+          initialRegion={curLoc}
+          ref={mapRef}
         >
-          <Image
-            source={require("../img/currentlocation.png")}
-            style={{ width: 80, height: 80 }}
+
+
+          <Marker.Animated
+            ref={markerRef}
+            coordinate={coordinate}
+          >
+            <Image
+              source={require("../img/currentlocation.png")}
+              style={{ width: height/9, height: height/9 }}
+            />
+          </Marker.Animated>
+
+          {
+            information.map((item, index) => (
+              <Marker key={index}
+                coordinate={{
+                  latitude: item.latitudes,
+                  longitude: item.longitudes,
+                }}
+                title={item.titles}
+                onPress={() => {
+                  setModal(item)
+                }}
+              >
+                <Image
+                  source={require("../img/parking.png")}
+                  style={{ width: height/18, height: height/18 }}
+                  
+                />
+              </Marker>
+
+            ))
+          }
+        </MapView>
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+          }}
+          onPress={onCenter}
+        >
+          <Image source={require("../img/crntbtn.png")}
+            style={{ height: height/9, width: height/9}}
+            tintColor={Colorf.c}
+           
           />
-        </Marker.Animated>
+          
+        </TouchableOpacity>
 
-        {
-          information.map((item, index) => (
-            <Marker key={index}
-              coordinate={{
-                latitude: item.latitudes,
-                longitude: item.longitudes,
-              }}
-              title={item.titles}
-              onPress={() => {
-                setModal(item)
-              }}
-            >
-              <Image
-                source={require("../img/parking.png")}
-                style={{ width: 30, height: 40 }}
-              />
-            </Marker>
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <MODAL
+            value={data}
+            close_btn={modal_close_btn}
+            confirm_btn={modal_confirm_btn}
+            routedistance={routeDistance}
+            locationame={savea_Place.titles}
+            star={savea_Place.review}
+            pp={props}
+          />
+        </View>
 
-          ))
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <Review
+            value={review}
+            close_btn={(val) => setreview(val)}
+            location={savea_Place}
+            username={credentials}
+
+          />
+        </View>
+
+        {!mapRoute ? (
+          <View style={{ flex: 1 }}>
+            <ListPages
+              provideinfo={placesInfo}
+              funcformodalopen={setModalforlist}
+            />
+          </View>) : null
         }
-      </MapView>
-      <TouchableOpacity
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-        }}
-        onPress={onCenter}
-      >
-        <Image source={require("../img/crntbtn.png")}
-          style={{ height: 80, width: 80 }} />
-      </TouchableOpacity>
 
-
-      {!mapRoute ? (
-        <View style={{ flex: 1 }}>
-          <ListPages
-            provideinfo={placesInfo}
-            funcformodalopen={setModalforlist}
-
-          />
-        </View>) : null
-      }
-
-
-
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <MODAL
-          value={data}
-          close_btn={modal_close_btn}
-          confirm_btn={modal_confirm_btn}
-          routedistance={routeDistance}
-          locationame={savea_Place.titles}
-          star={savea_Place.review}
-          pp={props}
-        />
-      </View>
-
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Review
-          value={review}
-          close_btn={(val)=>setreview(val)}
-          location={savea_Place}
-          username={credentials}
-
-        />
-      </View>
-
-    </View >
+      </View >
+    </SafeAreaView>
   );
 }
 

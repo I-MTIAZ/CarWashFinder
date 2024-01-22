@@ -139,14 +139,14 @@ export const Review = ({ value, close_btn, location, username }) => {
                         <View style={{ flexDirection: "row", justifyContent: "center", }}>
 
                             <Button
-                                icon={() => <AntDesign name="checkcircle" size={height / 35} color={Colorf.c} />}
+                                icon={() => <AntDesign name="checkcircle" size={height / 40} color={Colorf.c} />}
                                 mode="outlined"
                                 onPress={() => submitReview()}
                                 style={styles.btn}
                                 theme={{ roundness: 2 }}
                                 contentStyle={{ flexDirection: "row-reverse" }}
                                 labelStyle={{
-                                    fontSize: height / 35, // Adjust the font size as needed
+                                    fontSize: height / 40, // Adjust the font size as needed
                                     fontWeight: 500, // Use 'bold' for bold text
                                     color: Colorf.c,
                                     fontFamily: Colorf.f,
@@ -155,14 +155,14 @@ export const Review = ({ value, close_btn, location, username }) => {
                                 Submit
                             </Button>
                             <Button
-                                icon={() => <AntDesign name="closecircle" size={height / 35} color={Colorf.c} />}
+                                icon={() => <AntDesign name="closecircle" size={height / 40} color={Colorf.c} />}
                                 mode="outlined"
                                 onPress={() => closebtn()}
                                 style={styles.btn}
                                 theme={{ roundness: 2 }}
                                 contentStyle={{ flexDirection: "row-reverse" }}
                                 labelStyle={{
-                                    fontSize: height / 35, // Adjust the font size as needed
+                                    fontSize: height / 40, // Adjust the font size as needed
                                     fontWeight: 500, // Use 'bold' for bold text
                                     color: Colorf.c,
                                     fontFamily: Colorf.f,
