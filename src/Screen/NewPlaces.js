@@ -79,7 +79,7 @@ export const NewPlaces = (props) => {
 
   }
   const hidevisible = (val) => {
-    setalertact({ msg: "", bull: false, icon: "", des: "we will contact you soon" })
+    setalertact({ msg: "", bull: val, icon: "", des: "" })
   }
   //fianl submit button
   const selectedlocation = () => {
@@ -87,7 +87,7 @@ export const NewPlaces = (props) => {
     console.log(Uname, " ",Pnumber+1, " ", Placename," ",addreSS.latitude,)
     
     
-    axios.post(`${DataBase}/insertLocation`, {
+    /* axios.post(`${DataBase}/insertLocation`, {
       Name: Uname,
       Phone: Pnumber,
       Locationname:Placename,
@@ -100,7 +100,7 @@ export const NewPlaces = (props) => {
       .catch(error => {
         Alert.alert('Error submitting New Location:', error);
         // Handle error accordingly
-      });
+      }); */
     //navigation.goBack();
     
   }
@@ -171,7 +171,7 @@ export const NewPlaces = (props) => {
           </View>
 
         ) : null
-      }
+      } 
       {
         alertact ? (
           <ALERT

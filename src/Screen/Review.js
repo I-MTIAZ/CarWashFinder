@@ -45,32 +45,31 @@ export const Review = ({ value, close_btn, location, username }) => {
     //console.log(textInput)
 
     const submitReview = () => {
-        const ratings = ((clean+hygiene+secure)/3)
+        const ratings = ((clean + hygiene + secure) / 3)
 
-        if(clean === 0 || hygiene === 0  || secure === 0  )
-        {
+        if (clean === 0 || hygiene === 0 || secure === 0) {
             onToggleSnackBar()
         }
-        else{
+        else {
             // Make a POST request to insert a new review on the server
-        axios.post(`${DataBase}/insertReview`, {
-            star: ratings,
-            text: textInput,
-            location: location.titles,
-            uname: username
-        })
-            .then(response => {
-                console.log('Review submitted successfully:', response.data);
+            axios.post(`${DataBase}/insertReview`, {
+                star: ratings,
+                text: textInput,
+                location: location.titles,
+                uname: username
             })
-            .catch(error => {
-                Alert.alert('Error submitting review:', error);
-                // Handle error accordingly
-            });
-        close_btn(false);
-        /* console.log(clean,hygiene,secure)
-        console.log(clean+hygiene+secure)
-        console.log((clean+hygiene+secure)/3)
-        console.log(ratings) */
+                .then(response => {
+                    console.log('Review submitted successfully:', response.data);
+                })
+                .catch(error => {
+                    Alert.alert('Error submitting review:', error);
+                    // Handle error accordingly
+                });
+            close_btn(false);
+            /* console.log(clean,hygiene,secure)
+            console.log(clean+hygiene+secure)
+            console.log((clean+hygiene+secure)/3)
+            console.log(ratings) */
         }
     };
     const closebtn = () => {
@@ -108,7 +107,7 @@ export const Review = ({ value, close_btn, location, username }) => {
                                 numberOfLines={2}
 
                             />
-                            <Text style={{ margin: '5%',color:Colorf.d }}>{`Remaining character: ${remainingCharacters}/${characterLimit}`}</Text>
+                            <Text style={{ margin: '5%', color: Colorf.d }}>{`Remaining character: ${remainingCharacters}/${characterLimit}`}</Text>
 
                         </View>
 
@@ -170,16 +169,16 @@ export const Review = ({ value, close_btn, location, username }) => {
                             >
                                 Not Now
                             </Button>
-            
+
                         </View>
                         <Snackbar
-                                visible={visible}
-                                onDismiss={onDismissSnackBar}
-                                duration={2000}
-                                style={{ alignItems: "center", justifyContent: "center", backgroundColor: Colorf.d}}
-                            >
-                                Plese Fill All Ratings
-                            </Snackbar>
+                            visible={visible}
+                            onDismiss={onDismissSnackBar}
+                            duration={2000}
+                            style={{ alignItems: "center", justifyContent: "center", backgroundColor: Colorf.d }}
+                        >
+                            Plese Fill All Ratings
+                        </Snackbar>
                     </View>
                 </View>
             </Modal>

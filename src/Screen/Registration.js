@@ -2,98 +2,211 @@ import {
   Alert,
   SafeAreaView,
   StyleSheet,
-  Text, 
-  TextInput,
+  Text,
   TouchableOpacity,
   View,
+  Dimensions
 } from "react-native";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import * as Keychain from "react-native-keychain";
 import { DataBase } from "../Constrains/GoogleApi";
 import { CommonActions } from '@react-navigation/native';
 import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
-
+import { Snackbar, TextInput, Button } from 'react-native-paper';
+import { Colorf } from '../Constrains/COLOR';
+import PhoneInput from 'react-native-phone-number-input';
+import { isValidUsername, isValidEmail } from '../Helperfuncton/Helperfun'
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
+const { height } = Dimensions.get("window");
+import { saveUserData, getUserData } from '../Helperfuncton/Asstore'
 
 export const Registration = (props) => {
   const [checklogin, setchecklogin] = useState(false)
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [cpassword, setcPassword] = useState('')
-  useEffect(() => {
-    (async () => {
-      try {
-        const credentials = await Keychain.getGenericPassword();
-        if (credentials) {
-          // Pass credentials to START screen and prevent going back
-          Alert.alert(
-            'You Already log in to your Account',
-            'Please Log Out to registration',
-            [{ text: 'OK'}])
-          props.navigation.navigate('LOGIN')
-        } else {
-          console.log("No credentials stored");
-          setchecklogin(true)
-        }
-      } catch (error) {
-        console.log("Keychain couldn't be accessed!", error);
+  const [formattedValue, setFormattedValue] = useState("");
+  const [uname, setuname] = useState("")
+
+  ////
+
+
+
+  const [verificationCode, setVerificationCode] = useState("");
+  const phoneInput = useRef(null);
+  const [getOtp, setgetOtp] = useState(1)
+  const [visible, setVisible] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(null);
+  const [erotilte, seterotitle] = useState("")
+
+  const onToggleSnackBar = () => setVisible(!visible);
+  const onDismissSnackBar = () => setVisible(false);
+
+  const checkunique = async () => {
+    try {
+      const response = await axios.post(`${DataBase}/checkDuplicateKey`, { id: formattedValue });
+      return response.data.isDuplicate;
+    } catch (error) {
+      console.error('Error checking duplicate key:', error);
+      return null;
+    }
+  };
+
+
+
+
+  const sendVerificationRequest = async () => {
+    try {
+      setgetOtp(2)
+      /* const response = await axios.post(`${DataBase}/sendVerification`, { phoneNumber: formattedValue });
+
+      if (response.data.status === 'pending') {
+        console.log("before ", response.data.status)
+        setgetOtp(2)
+        
+      }  */
+    } catch (error) {
+      console.error('Error sending verification request:', error.message);
+    }
+  };
+
+  const checkVerificationCode = async () => {
+    try {
+      setgetOtp(3)
+      /* const response = await axios.post(`${DataBase}/checkVerification`, {
+        phoneNumber: formattedValue,
+        verificationCode: verificationCode,
+      });
+
+      if (response.data.status === 'approved') {
+        setgetOtp(3)
+        console.log("after ", response.data.status)
+        Alert.alert('Success', 'OTP verified successfully');
+      }  */
+    } catch (error) {
+      console.error('Error checking verification code:', error.message);
+    }
+  };
+  const handleOtp = async () => {
+    const checkValid = phoneInput.current?.isValidNumber(formattedValue);
+    const isValiduname = isValidUsername(uname);
+
+    if (checkValid && isValiduname) {
+
+      const isDuplicate = await checkunique();
+
+      if (!isDuplicate) {
+        console.log('unique');
+        sendVerificationRequest()
+        return;
       }
-    })()
+
+      if (isDuplicate) {
+        
+        seterotitle("This number already registered, use different number")
+        onToggleSnackBar()
+        return;
+      }
+
+
+    }
+    else if (!checkValid && !isValiduname) {
+      setuname('')
+      setFormattedValue('')
+      seterotitle("Name & Number is Not Valid")
+      onToggleSnackBar()
+    }
+    else if (!isValiduname) {
+      // Handle invalid input, you can show a message or take appropriate action
+      setuname('')
+      seterotitle("Name is Not Valid")
+      onToggleSnackBar()
+    }
+    else if (!checkValid) {
+      setFormattedValue('')
+      seterotitle("Number is Not Valid")
+      onToggleSnackBar()
+    }
+  };
+
+
+  //////
+
+
+  useEffect(() => {
+    // Fetch user data when the component mounts
+    fetchData();
   }, []);
+  const fetchData = async () => {
+    // Call the getUserData function to retrieve user data
+    const userData = await getUserData();
 
+    if (userData) {
+      console.log('User Data in ProfilePage:', userData);
+      props.navigation.dispatch(CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'BtabNev',
+            params: userData,
+          },
+        ],
+      }));
+      setchecklogin(false)
+    } else {
+      console.log('User data not found.');
+      setchecklogin(true)
+    }
+  };
   const handleSignUp = () => {
-    console.log(email);
-    console.log(password);
-    console.log(cpassword);
+    setchecklogin(false)
+    const isEmailValid = isValidEmail(email);
+    if (isEmailValid) {
 
-    if (password === cpassword && password !== "" && cpassword !== "" && email !== "") {
-      axios.post(`${DataBase}/register`, { email, password })
+      axios.post(`${DataBase}/register`, { email, formattedValue, uname })
         .then(response => {
           const data = response.data;
           console.log(data);
 
           if (data.success) {
             // Registration successful
-            Keychain.setGenericPassword(email, password);
-            // Pass credentials to START screen and prevent going back
-            /* props.navigation.dispatch(CommonActions.navigate({
-              name: 'DrawNev',
-              params: email,
-            })); */
+            saveUserData(email, formattedValue, uname);
             props.navigation.dispatch(CommonActions.reset({
               index: 0,
               routes: [
-                  {
-                      name: 'BtabNev',
-                      params: email,
+                {
+                  name: 'BtabNev',
+                  params: {
+                    email: email,
+                    number: formattedValue,
+                    name: uname,
                   },
+                },
               ],
-          }));
+            }));
+          }
+          else {
+            // Registration failed, handle the error
+            console.error('Registration failed:', data.error);
+            // Handle the error in your UI, e.g., show an alert or update state
           }
         })
         .catch(error => {
-          console.log('Error sending registration data:', error);
-          // Handle error
-          //checklogin(true)
-          
+          console.log("problem", error);
         })
         .finally(() => {
           // Reset form fields
-          Alert.alert('Email already exists. Please use a different email.','try again'
-          [{title: 'OK',onPress:setchecklogin(true)}]);
           setEmail("");
-          setPassword("");
-          setcPassword("");
+          setuname("");
+          setFormattedValue("")
         });
+
     } else {
-      Alert.alert('Something is Wrong',
-      'password not matched or field is empty',
-      [{title: 'OK',onPress:setchecklogin(true)}]
-      );
-      // Reset form fields
+      setchecklogin(true)
+      setgetOtp(3)
+      seterotitle("Email is Not Valid")
       setEmail("");
-      setPassword("");
-      setcPassword("");
+      onToggleSnackBar()
+
     }
   };
 
@@ -101,87 +214,108 @@ export const Registration = (props) => {
     <SafeAreaView>
       {
         checklogin ? (
-          <View
-            style={{
-              padding: 20,
-            }}
-          >
-            <View
-              style={{
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 35,
-                  color: "red",
-                  marginVertical: 25,
-                }}
-              >
-                Create account
-              </Text>
-              <Text
-                style={{
-                  fontSize: 20,
-                  maxWidth: "80%",
-                  textAlign: "center",
-                }}
-              >
-                Create an account so you can explore all the existing jobs
-              </Text>
-            </View>
-            <View
-              style={{
-                marginVertical: 5,
-              }}
-            >
-              <TextInput
-                placeholder="Email"
-                value={email} // Set the value of the TextInput to the 'email' state variable
-                onChangeText={(text) => setEmail(text)} // Update the 'email' state variable on change
-              />
-              <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={(text) => setPassword(text)}
-              />
-              <TextInput
-                placeholder="Confirm Password"
-                value={cpassword}
-                onChangeText={(text) => setcPassword(text)}
-              />
+          <View >
 
-            </View>
+            {
+              getOtp == 1 ? (
+                <View style={{ justifyContent: "center", alignItems: "center" }}>
+                  <TextInput
+                    value={uname}
+                    placeholder="Type here..."
+                    onChangeText={txt => setuname(txt)}
+                    activeUnderlineColor={Colorf.c}
+                    multiline={true}
+                    numberOfLines={2}
+                  />
 
-            <TouchableOpacity
-              style={{
-                padding: 10,
-                backgroundColor: "orange",
-                marginVertical: 10,
-                borderRadius: 15,
-                shadowColor: "black",
-                shadowOffset: {
-                  width: 0,
-                  height: 10,
-                },
-                shadowOpacity: 0.3,
-                shadowRadius: 25,
+                  <PhoneInput
+                    ref={phoneInput}
+                    defaultValue={formattedValue}
+                    defaultCode="US"
+                    layout="first"
+                    onChangeFormattedText={(text) => setFormattedValue(text)}
+                    withDarkTheme
+                    withShadow
+                    autoFocus
+                  />
+                  <TouchableOpacity
+                    style={{ height: 50, width: 200, backgroundColor: "#7141A0", justifyContent: "center", marginVertical: '5%' }}
+                    onPress={handleOtp}
+                  >
+                    <View>
+                      <Text style={{ fontSize: 25, textAlign: "center", fontWeight: "800" }}>Ok</Text>
+                    </View>
 
-              }}
-              onPress={ () =>{
-                setchecklogin(false)
-                handleSignUp()}}
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            }
+
+            {
+              getOtp == 2 ? (
+                <View>
+                  <TextInput
+                    placeholder="Enter OTP"
+                    value={verificationCode}
+                    onChangeText={(text) => setVerificationCode(text)}
+                    keyboardType="numeric"
+                    style={{ height: 40, borderColor: 'gray', borderWidth: 1, width: 200, marginBottom: '5%' }}
+                  />
+
+                  <TouchableOpacity
+                    style={{ height: 50, width: 200, backgroundColor: "#7141A0", justifyContent: "center", marginVertical: '5%' }}
+                    onPress={checkVerificationCode}
+                  >
+                    <View>
+                      <Text style={{ fontSize: 25, textAlign: "center", fontWeight: "800" }}>Check</Text>
+                    </View>
+
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            }
+            {
+              getOtp == 3 ? (
+                <View>
+                  <TextInput
+                    placeholder="Enter Email"
+                    value={email}
+                    onChangeText={(txt) => setEmail(txt)}
+                    style={{ height: 40, borderColor: 'gray', borderWidth: 1, width: 200, marginBottom: '5%' }}
+                  />
+
+                  <Button
+                    icon={() => <FontAwesome6 name="map-location-dot" size={height / 40} color={Colorf.c} />}
+                    mode="outlined"
+                    onPress={() => {
+                      handleSignUp()
+                    }}
+                    /* style={styles.btn} */
+                    theme={{ roundness: 2 }}
+                    contentStyle={{ flexDirection: "row-reverse" }}
+                    labelStyle={{
+                      fontSize: height / 40, // Adjust the font size as needed
+                      fontWeight: 500, // Use 'bold' for bold text
+                      color: Colorf.c,
+                      fontFamily: Colorf.f,
+                    }}
+                  >
+                    Map
+                  </Button>
+                </View>
+              ) : null
+            }
+            <Snackbar
+              visible={visible}
+              onDismiss={onDismissSnackBar}
+              duration={2000}
+              style={{ alignItems: "center", justifyContent: "center", backgroundColor: Colorf.d, position: "absolute", bottom: -150, }}
             >
-              <Text
-                style={{
-                  color: "black",
-                  textAlign: "center",
-                  fontSize: 45,
-                }}
-              >
-                Sign up
-              </Text>
-            </TouchableOpacity>
+              {erotilte}
+            </Snackbar>
+
+
+
             <TouchableOpacity
               onPress={() => props.navigation.navigate('LOGIN')}
               style={{
@@ -214,3 +348,8 @@ export const Registration = (props) => {
 const styles = StyleSheet.create({})
 
 
+/* 
+ onPress={ () =>{
+                setchecklogin(false)
+                handleSignUp()}}
+*/

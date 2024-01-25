@@ -24,7 +24,7 @@ export const TypeTwogMap = (props) => {
   const markerRef = useRef()
   //console.log(props.route.params.data)
   const credentials = props.route.params.data
-  //console.log("credintial = ", credentials)
+  console.log("credintial = ", credentials)
 
 
   //console.log("in map checking => ",credentials);
@@ -443,7 +443,7 @@ export const TypeTwogMap = (props) => {
             value={review}
             close_btn={(val) => setreview(val)}
             location={savea_Place}
-            username={credentials}
+            username={credentials.name}
 
           />
         </View>

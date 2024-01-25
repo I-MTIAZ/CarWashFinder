@@ -7,7 +7,6 @@ import {
     TextInput,
     TouchableOpacity,
     View,
-    Dimensions
 } from "react-native";
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -16,15 +15,10 @@ import * as Keychain from "react-native-keychain";
 import Spinner from 'react-native-loading-spinner-overlay';
 import PhoneInput from "react-native-phone-number-input";
 import { ALERT } from '../Constrains/ALERT';
-import { Snackbar } from 'react-native-paper';
-import { Colorf } from '../Constrains/COLOR';
-
-const { height } = Dimensions.get("window");
-
 export const Login = (props) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    
+    const [userDetails, setUserDetails] = useState({});
     const Spacing = 0.2;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -52,7 +46,7 @@ export const Login = (props) => {
 
                 const credentials = await Keychain.getGenericPassword();
                 if (credentials) {
-                    
+                    setUserDetails(credentials);
 
                     // Pass credentials to START screen and prevent going back
                     props.navigation.dispatch(CommonActions.reset({
@@ -88,7 +82,7 @@ export const Login = (props) => {
                 console.log(response.data);
                 console.log("====>>  Happy Login <<======");
                 Keychain.setGenericPassword(email, password);
-                
+                setUserDetails({ email, password });
 
                 // Pass credentials to START screen and prevent going back
                 /*  props.navigation.dispatch(CommonActions.navigate({
@@ -126,8 +120,37 @@ export const Login = (props) => {
             <View>
                 {
                     isLoggedIn ? (
-                        <View>
-
+                        <View
+                            style={{
+                                padding: Spacing * 2,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: 50,
+                                        color: "blue",
+                                        marginVertical: 20 * 2,
+                                        fontWeight: "600"
+                                    }}
+                                >
+                                    Login here
+                                </Text>
+                                <Text
+                                    style={{
+                                        color: "black",
+                                        fontSize: 20,
+                                        maxWidth: "60%",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    Welcome back you've been missed!
+                                </Text>
+                            </View>
                             <View
                                 style={{
                                     marginVertical: 20 * 3,
@@ -140,8 +163,7 @@ export const Login = (props) => {
                                     backgroundColor: "#E5E5E6",
                                     marginVertical: 3, borderRadius: 10
                                 }}
-                                    onChangeText={(text) => setEmail(text)}
-                                />
+                                    onChangeText={(text) => setEmail(text)} />
                                 <TextInput placeholder="Password" style={{
                                     backgroundColor: "#E5E5E6",
                                     marginVertical: 5, borderRadius: 10
@@ -149,8 +171,17 @@ export const Login = (props) => {
                                     onChangeText={(text) => setPassword(text)} />
                             </View>
 
-
-
+                            <View>
+                                <Text
+                                    style={{
+                                        fontSize: 16,
+                                        color: "red",
+                                        textAlign: "center"
+                                    }}
+                                >
+                                    Forgot your password ?
+                                </Text>
+                            </View>
 
                             <TouchableOpacity
                                 onPress={() => {
@@ -205,10 +236,10 @@ export const Login = (props) => {
 
                         </View>
                     ) : (
-                        <View>
+                        <View> 
                             <ALERT
-                                visible={alertact}
-                                hidevisible={(val) => { setalertact({ msg: "", bull: val, icon: "", des: "" }) }}
+                            visible={alertact}
+                            hidevisible={(val)=>{setalertact({ msg: "", bull: val, icon: "", des: "" })}}
                             />
                             <Spinner
                                 visible={true}
@@ -226,3 +257,80 @@ export const Login = (props) => {
 const styles = StyleSheet.create({})
 
 
+
+
+
+
+
+///////////////////////////////
+
+
+app.post('/login', (req, res) => {
+  const { phoneNumber } = req.body;
+
+  const sql = 'SELECT * FROM users WHERE phone_number = ?';
+  db.query(sql, [phoneNumber], (err, results) => {
+    if (err) {
+      console.error('Error querying database:', err);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    } else {
+      if (results.length > 0) {
+        // Assuming the phone number is unique, directly access the first result
+        const userData = {
+          id: results[0].id,
+          name: results[0].name,
+          // Add other user properties as needed
+        };
+        res.status(200).json({ success: true, data: userData });
+      } else {
+        res.status(401).json({ success: false, error: 'Invalid phone number' });
+      }
+    }
+  });
+});
+
+
+
+
+
+////////////
+
+
+const handleLogin = async () => {
+    const backendUrl = DataBase;
+    if (phoneNumber !== "") {
+        try {
+            setCheckFetch(false);
+
+            const response = await axios.post(`${backendUrl}/login`, { phoneNumber });
+
+            // Check if data is fetched successfully
+            if (response.data) {
+                setCheckFetch(true);
+
+                // Assuming the response contains the user's name
+                const userName = response.data.name;
+
+                // Do something with the user's name, like updating state
+                setUserName(userName);
+
+                console.log(response.data);
+                console.log("====>> Happy Login <<======");
+
+                // You might want to store the phone number and name securely
+                // For example, using AsyncStorage in React Native
+                AsyncStorage.setItem('phoneNumber', phoneNumber);
+                AsyncStorage.setItem('userName', userName);
+            } else {
+                // Handle the case where the phone number is not found
+                console.log("Phone number not found");
+            }
+        } catch (error) {
+            // Handle any errors that occur during the API call
+            console.error("Error during login:", error);
+        }
+    } else {
+        // Handle the case where the phone number is empty
+        console.log("Phone number is required");
+    }
+};

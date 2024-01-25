@@ -29,7 +29,7 @@ export const PROFILE = (props) => {
                 <View style={{ alignItems: "center", marginTop: '8%' }}>
                     <FontAwesome name="user-circle-o" color='#00674b'
                         size={height / 6} />
-                    <Text style={{ marginTop: '6%' }}>Imtiaz{props.route.params}</Text>
+                    <Text style={{ marginTop: '6%' }}>{props.route.params.name}</Text>
                 </View>
 
                 <View style={{ margin: height / 55 }}>
@@ -37,21 +37,21 @@ export const PROFILE = (props) => {
 
                         <FontAwesome name="edit" color='#00674b' size={logoheight} />
                         <View style={{ marginLeft: 20 }}>
-                            <Text style={styles.btn_txt}>Name</Text>
+                            <Text style={styles.btn_txt}>Name: {props.route.params.name}</Text>
                         </View>
                     </TouchableOpacity>
                     
                     <TouchableOpacity onPress={() => setmodalVisible({ bool: true, data: "Email" })} style={styles.btn}>
                         <MaterialIcons name="email" color='#00674b' size={logoheight} />
                         <View style={{ marginLeft: 20 }}>
-                            <Text style={styles.btn_txt}>Email</Text>
+                            <Text style={styles.btn_txt}>Email: {props.route.params.email}</Text>
                         </View>
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={onToggleSnackBar} style={styles.btn}>
                         <MaterialIcons name="smartphone" color='#00674b' size={logoheight} />
                         <View style={{ marginLeft: 20 }}>
-                            <Text style={styles.btn_txt}>Phone : {props.route.params}012458787</Text>
+                            <Text style={styles.btn_txt}>Phone : {props.route.params.number}</Text>
                         </View>
                     </TouchableOpacity>
 

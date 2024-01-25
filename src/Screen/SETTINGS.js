@@ -9,6 +9,8 @@ import AntDesign from 'react-native-vector-icons/AntDesign' //profile // infocir
 import Entypo from 'react-native-vector-icons/Entypo' // log-out
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons' //account-cancel // cash-plus
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 import axios from 'axios';
@@ -22,8 +24,9 @@ export const SETTINGS = (props) => {
 
 
     const handleLogout = async () => {
-        const logout = await Keychain.resetGenericPassword();
-        console.log({ logout });
+        await AsyncStorage.removeItem('email');
+        await AsyncStorage.removeItem('number');
+        await AsyncStorage.removeItem('name');
         props.navigation.dispatch(
             CommonActions.reset({
                 index: 0,
@@ -65,7 +68,7 @@ export const SETTINGS = (props) => {
     }
 
     const handleprofile = () => {
-        props.navigation.navigate("PROFILE",props.route.params)
+        props.navigation.navigate("PROFILE", props.route.params)
     }
     const handleAppinfo = () => {
 
@@ -81,7 +84,7 @@ export const SETTINGS = (props) => {
                 <View style={{ alignItems: "center", marginTop: '8%' }}>
                     <FontAwesome name="user-circle-o" color='#00674b'
                         size={height / 6} />
-                    <Text style={{ marginTop: '6%' }}>Imtiaz{props.route.params}</Text>
+                    <Text style={{ marginTop: '6%' }}>{props.route.params.number}</Text>
                 </View>
 
                 <View style={{ marginTop: height / 20, marginBottom: height / 20 }}>
