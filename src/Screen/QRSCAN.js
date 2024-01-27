@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Linking, Text } from 'react-native';
-import QRCodeScanner from 'react-native-qrcode-scanner';
+import QRCode from 'react-native-qrcode-svg';
+import {Colorf} from '../Constrains/COLOR'
+import LottieView from 'lottie-react-native';
 
-export const QRSCAN = () => {
-    const[info,setinfo]=useState("Scanner")
-    const handleQRCodeScanned = ({ data }) => {
-        setinfo(data)
-    };
+export const QRSCAN = (props) => {
+    console.log("hahah",props.route.params.number)
 
     return (
         <View style={styles.container}>
-            <QRCodeScanner
-                onRead={handleQRCodeScanned}
-                reactivate={true}
-                reactivateTimeout={500}
-                showMarker={true}
-                topContent={<View><Text style={styles.centerText}>{info}</Text></View>}
+            <LottieView 
+            style ={{height:250,width:250}} 
+            source={require('../img//anim.json')}
+            autoPlay loop />
+            <QRCode
+                value={props.route.params.number}
+                size={250}
+                color={Colorf.c}
+                backgroundColor={Colorf.b}
             />
         </View>
     );
@@ -26,11 +28,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor:Colorf.b
     },
     centerText: {
         fontSize: 16,
         color: 'black',
-        marginBottom:20
+        marginBottom: 20
     },
 });
 

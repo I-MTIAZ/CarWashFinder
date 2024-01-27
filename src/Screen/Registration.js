@@ -8,18 +8,21 @@ import {
   Dimensions
 } from "react-native";
 import React, { useEffect, useState, useRef } from 'react';
-import * as Keychain from "react-native-keychain";
 import { DataBase } from "../Constrains/GoogleApi";
 import { CommonActions } from '@react-navigation/native';
 import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
-import { Snackbar, TextInput, Button } from 'react-native-paper';
+import { Snackbar, TextInput, Button, Avatar } from 'react-native-paper';
 import { Colorf } from '../Constrains/COLOR';
 import PhoneInput from 'react-native-phone-number-input';
 import { isValidUsername, isValidEmail } from '../Helperfuncton/Helperfun'
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 const { height } = Dimensions.get("window");
 import { saveUserData, getUserData } from '../Helperfuncton/Asstore'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+
 
 export const Registration = (props) => {
   const [checklogin, setchecklogin] = useState(false)
@@ -33,13 +36,23 @@ export const Registration = (props) => {
 
   const [verificationCode, setVerificationCode] = useState("");
   const phoneInput = useRef(null);
-  const [getOtp, setgetOtp] = useState(1)
+  const [getOtp, setgetOtp] = useState(0)
   const [visible, setVisible] = useState(false);
-  const [isDuplicate, setIsDuplicate] = useState(null);
   const [erotilte, seterotitle] = useState("")
 
   const onToggleSnackBar = () => setVisible(!visible);
   const onDismissSnackBar = () => setVisible(false);
+
+
+  const characterLimit = 10;
+  const characterCount = uname.length;
+  const remainingCharacters = characterLimit - characterCount
+
+  const handleTextChange = (text) => {
+    if (text.length <= characterLimit) {
+      setuname(text);
+    }
+  }
 
   const checkunique = async () => {
     try {
@@ -56,12 +69,12 @@ export const Registration = (props) => {
 
   const sendVerificationRequest = async () => {
     try {
-      setgetOtp(2)
+      setgetOtp(3)
       /* const response = await axios.post(`${DataBase}/sendVerification`, { phoneNumber: formattedValue });
 
       if (response.data.status === 'pending') {
         console.log("before ", response.data.status)
-        setgetOtp(2)
+        setgetOtp(3)
         
       }  */
     } catch (error) {
@@ -71,14 +84,14 @@ export const Registration = (props) => {
 
   const checkVerificationCode = async () => {
     try {
-      setgetOtp(3)
+      setgetOtp(4)
       /* const response = await axios.post(`${DataBase}/checkVerification`, {
         phoneNumber: formattedValue,
         verificationCode: verificationCode,
       });
 
       if (response.data.status === 'approved') {
-        setgetOtp(3)
+        setgetOtp(4)
         console.log("after ", response.data.status)
         Alert.alert('Success', 'OTP verified successfully');
       }  */
@@ -87,46 +100,50 @@ export const Registration = (props) => {
     }
   };
   const handleOtp = async () => {
+    setchecklogin(false)
     const checkValid = phoneInput.current?.isValidNumber(formattedValue);
-    const isValiduname = isValidUsername(uname);
 
-    if (checkValid && isValiduname) {
+
+    if (checkValid) {
 
       const isDuplicate = await checkunique();
 
       if (!isDuplicate) {
+        setchecklogin(true)
         console.log('unique');
         sendVerificationRequest()
+
         return;
       }
 
       if (isDuplicate) {
-        
+        setchecklogin(true)
         seterotitle("This number already registered, use different number")
         onToggleSnackBar()
+
         return;
       }
-
-
     }
-    else if (!checkValid && !isValiduname) {
-      setuname('')
+    else {
+      setchecklogin(true)
       setFormattedValue('')
-      seterotitle("Name & Number is Not Valid")
+      seterotitle("Number is Not Valid")
       onToggleSnackBar()
+
     }
-    else if (!isValiduname) {
-      // Handle invalid input, you can show a message or take appropriate action
+  };
+
+  const handleuname = () => {
+    const isValiduname = isValidUsername(uname);
+    if (isValiduname) {
+      setgetOtp(2)
+    }
+    else {
       setuname('')
       seterotitle("Name is Not Valid")
       onToggleSnackBar()
     }
-    else if (!checkValid) {
-      setFormattedValue('')
-      seterotitle("Number is Not Valid")
-      onToggleSnackBar()
-    }
-  };
+  }
 
 
   //////
@@ -202,32 +219,120 @@ export const Registration = (props) => {
 
     } else {
       setchecklogin(true)
-      setgetOtp(3)
+      setgetOtp(4)
       seterotitle("Email is Not Valid")
       setEmail("");
       onToggleSnackBar()
 
     }
+
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colorf.b }}>
       {
         checklogin ? (
           <View >
+            {
+              getOtp > 0 ? (
+                <View style={{ marginTop: height / 8 }}>
+                  <MaterialCommunityIcons
+                    name="debug-step-over"
+                    size={height / 25}
+                    color={Colorf.c}
+                    style={{ textAlign: "center", }}
+                  />
+                  <Text style={styles.steptxt} >Step {getOtp} / 4 </Text>
+                </View>
+              ) : null
+            }
+            {
+              getOtp === 0 ? (
+                <View style={{ marginTop: height / 5 }}>
+                  <AntDesign name="adduser" size={height / 10} color={Colorf.c}
+                    style={{ textAlign: "center", margin: '5%' }} />
+
+                  <Text style={{ textAlign: "center" }}>Registration Pannel</Text>
+                  <Text style={{ textAlign: "center", fontSize: 30 }}>Create Your Account</Text>
+
+                  <View style={{ alignItems: "center" }}>
+                    <Button
+                      icon={() => <MaterialIcons name="navigate-next" size={height / 30} color={Colorf.c} />}
+                      mode="outlined"
+                      onPress={() => setgetOtp(1)}
+                      style={styles.btn}
+                      theme={{ roundness: 2 }}
+                      contentStyle={{ flexDirection: "row-reverse" }}
+                      labelStyle={{
+                        fontSize: height / 40, // Adjust the font size as needed
+                        fontWeight: 500, // Use 'bold' for bold text
+                        color: Colorf.c,
+                        fontFamily: Colorf.f,
+                      }}
+                    >
+                      Next
+                    </Button>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => props.navigation.navigate('LOGIN')}
+                    style={{
+                      marginTop: 50
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: Colorf.d,
+                        textAlign: "center",
+                        fontSize: 18,
+                      }}
+                    >
+                      Already have an account
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null
+            }
+            {
+              getOtp === 1 ? (
+                <View >
+
+                  <View style={styles.txt_area}>
+
+                    <TextInput
+                      value={uname}
+                      onChangeText={handleTextChange}
+                      label="Enter your name"
+                      style={styles.textinput}
+                      activeUnderlineColor={Colorf.c}
+                    />
+
+                    <Text style={{ margin: '5%', color: Colorf.d }}>{`Remaining character: ${remainingCharacters}/${characterLimit}`}</Text>
+                  </View>
+                  <View style={{ alignItems: "center" }}>
+                    <Button
+                      icon={() => <MaterialIcons name="navigate-next" size={height / 30} color={Colorf.c} />}
+                      mode="outlined"
+                      onPress={() => handleuname()}
+                      style={styles.btn}
+                      theme={{ roundness: 2 }}
+                      contentStyle={{ flexDirection: "row-reverse" }}
+                      labelStyle={{
+                        fontSize: height / 40, // Adjust the font size as needed
+                        fontWeight: 500, // Use 'bold' for bold text
+                        color: Colorf.c,
+                        fontFamily: Colorf.f,
+                      }}
+                    >
+                      Next
+                    </Button>
+                  </View>
+                </View>
+              ) : null
+            }
 
             {
-              getOtp == 1 ? (
-                <View style={{ justifyContent: "center", alignItems: "center" }}>
-                  <TextInput
-                    value={uname}
-                    placeholder="Type here..."
-                    onChangeText={txt => setuname(txt)}
-                    activeUnderlineColor={Colorf.c}
-                    multiline={true}
-                    numberOfLines={2}
-                  />
-
+              getOtp == 2 ? (
+                <View style={{ justifyContent: "center", alignItems: "center", }}>
                   <PhoneInput
                     ref={phoneInput}
                     defaultValue={formattedValue}
@@ -238,59 +343,12 @@ export const Registration = (props) => {
                     withShadow
                     autoFocus
                   />
-                  <TouchableOpacity
-                    style={{ height: 50, width: 200, backgroundColor: "#7141A0", justifyContent: "center", marginVertical: '5%' }}
-                    onPress={handleOtp}
-                  >
-                    <View>
-                      <Text style={{ fontSize: 25, textAlign: "center", fontWeight: "800" }}>Ok</Text>
-                    </View>
-
-                  </TouchableOpacity>
-                </View>
-              ) : null
-            }
-
-            {
-              getOtp == 2 ? (
-                <View>
-                  <TextInput
-                    placeholder="Enter OTP"
-                    value={verificationCode}
-                    onChangeText={(text) => setVerificationCode(text)}
-                    keyboardType="numeric"
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1, width: 200, marginBottom: '5%' }}
-                  />
-
-                  <TouchableOpacity
-                    style={{ height: 50, width: 200, backgroundColor: "#7141A0", justifyContent: "center", marginVertical: '5%' }}
-                    onPress={checkVerificationCode}
-                  >
-                    <View>
-                      <Text style={{ fontSize: 25, textAlign: "center", fontWeight: "800" }}>Check</Text>
-                    </View>
-
-                  </TouchableOpacity>
-                </View>
-              ) : null
-            }
-            {
-              getOtp == 3 ? (
-                <View>
-                  <TextInput
-                    placeholder="Enter Email"
-                    value={email}
-                    onChangeText={(txt) => setEmail(txt)}
-                    style={{ height: 40, borderColor: 'gray', borderWidth: 1, width: 200, marginBottom: '5%' }}
-                  />
 
                   <Button
-                    icon={() => <FontAwesome6 name="map-location-dot" size={height / 40} color={Colorf.c} />}
+                    icon={() => <MaterialIcons name="navigate-next" size={height / 30} color={Colorf.c} />}
                     mode="outlined"
-                    onPress={() => {
-                      handleSignUp()
-                    }}
-                    /* style={styles.btn} */
+                    onPress={handleOtp}
+                    style={styles.btn}
                     theme={{ roundness: 2 }}
                     contentStyle={{ flexDirection: "row-reverse" }}
                     labelStyle={{
@@ -300,38 +358,79 @@ export const Registration = (props) => {
                       fontFamily: Colorf.f,
                     }}
                   >
-                    Map
+                    Next
                   </Button>
                 </View>
               ) : null
             }
-            <Snackbar
-              visible={visible}
-              onDismiss={onDismissSnackBar}
-              duration={2000}
-              style={{ alignItems: "center", justifyContent: "center", backgroundColor: Colorf.d, position: "absolute", bottom: -150, }}
-            >
-              {erotilte}
-            </Snackbar>
 
+            {
+              getOtp == 3 ? (
+                <View >
+                  <TextInput
+                    placeholder="Enter OTP"
+                    value={verificationCode}
+                    onChangeText={(text) => setVerificationCode(text)}
+                    keyboardType="numeric"
+                    style={styles.textinput}
+                    activeUnderlineColor={Colorf.c}
+                  />
+                  <View style={{ alignItems: "center" }}>
+                    <Button
+                      icon={() => <MaterialIcons name="navigate-next" size={height / 30} color={Colorf.c} />}
+                      mode="outlined"
+                      onPress={checkVerificationCode}
+                      style={styles.btn}
+                      theme={{ roundness: 2 }}
+                      contentStyle={{ flexDirection: "row-reverse" }}
+                      labelStyle={{
+                        fontSize: height / 40, // Adjust the font size as needed
+                        fontWeight: 500, // Use 'bold' for bold text
+                        color: Colorf.c,
+                        fontFamily: Colorf.f,
+                      }}
+                    >
+                      Next
+                    </Button>
+                  </View>
+                </View>
+              ) : null
+            }
+            {
+              getOtp == 4 ? (
+                <View>
+                  <TextInput
+                    placeholder="Enter Email"
+                    value={email}
+                    onChangeText={(txt) => setEmail(txt)}
+                    style={styles.textinput}
+                    activeUnderlineColor={Colorf.c}
+                  />
+                  <View style={{ alignItems: "center" }}>
+                    <Button
+                      icon={() => <AntDesign name="checkcircle" size={height / 40} color={Colorf.c} />}
+                      mode="outlined"
+                      style={styles.btn}
+                      onPress={() => {
+                        handleSignUp()
+                      }}
+                      /* style={styles.btn} */
+                      theme={{ roundness: 2 }}
+                      contentStyle={{ flexDirection: "row-reverse" }}
+                      labelStyle={{
+                        fontSize: height / 40, // Adjust the font size as needed
+                        fontWeight: 500, // Use 'bold' for bold text
+                        color: Colorf.c,
+                        fontFamily: Colorf.f,
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  </View>
+                </View>
+              ) : null
+            }
 
-
-            <TouchableOpacity
-              onPress={() => props.navigation.navigate('LOGIN')}
-              style={{
-                padding: 25,
-              }}
-            >
-              <Text
-                style={{
-                  color: "red",
-                  textAlign: "center",
-                  fontSize: 15,
-                }}
-              >
-                Already have an account
-              </Text>
-            </TouchableOpacity>
           </View>
         ) : (
           <Spinner
@@ -341,11 +440,49 @@ export const Registration = (props) => {
           />
         )
       }
+      <Snackbar
+        visible={visible}
+        onDismiss={onDismissSnackBar}
+        duration={2000}
+        style={{ backgroundColor: Colorf.d }}
+      >
+        {erotilte}
+      </Snackbar>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  txt_area: {
+    height: height / 5,
+    backgroundColor: "white",
+    borderRadius: 25,
+    marginLeft: '3%',
+    marginRight: '3%',
+  },
+  textinput: {
+    marginLeft: '2%',
+    marginRight: '2%',
+    fontWeight: "700",
+    marginTop: '3%',
+    maxHeight: 85,
+    backgroundColor: "white",
+  },
+  btn: {
+    backgroundColor: "white",
+    marginTop: '5%',
+    width: height / 3,
+  },
+
+  steptxt: {
+    fontSize: 20,
+    fontWeight: "500",
+    color: Colorf.c,
+    textAlign: "center",
+    marginBottom: '5%'
+  },
+
+})
 
 
 /* 

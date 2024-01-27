@@ -1,228 +1,355 @@
-import { CommonActions } from '@react-navigation/native';
 import {
     Alert,
     SafeAreaView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
     Dimensions
 } from "react-native";
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { DataBase } from "../Constrains/GoogleApi";
+import React, { useEffect, useState, useRef } from 'react';
 import * as Keychain from "react-native-keychain";
+import { DataBase } from "../Constrains/GoogleApi";
+import { CommonActions } from '@react-navigation/native';
+import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
-import PhoneInput from "react-native-phone-number-input";
-import { ALERT } from '../Constrains/ALERT';
-import { Snackbar } from 'react-native-paper';
+import { Snackbar, TextInput, Button } from 'react-native-paper';
 import { Colorf } from '../Constrains/COLOR';
-
+import PhoneInput from 'react-native-phone-number-input';
+import { isValidEmail } from '../Helperfuncton/Helperfun'
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 const { height } = Dimensions.get("window");
+import { saveUserData, getUserData } from '../Helperfuncton/Asstore'
+
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 export const Login = (props) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [checklogin, setchecklogin] = useState(false)
+    const [email, setEmail] = useState('')
+    const [formattedValue, setFormattedValue] = useState("");
+    const [uname, setuname] = useState("")
 
-    
-    const Spacing = 0.2;
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [checkfetch, setcheckfetch] = useState(true)
-    const [alertact, setalertact] = useState({ msg: "", boll: false, icon: "", des: "" })
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (!checkfetch) {
-                setalertact({ msg: 'Error Fetch Location', bull: true, icon: "alert", des: "" })
+    ////
+
+
+
+    const [verificationCode, setVerificationCode] = useState("");
+    const phoneInput = useRef(null);
+    const [getOtp, setgetOtp] = useState(0)
+    const [visible, setVisible] = useState(false);
+    const [userData, setuserData] = useState(null);
+    const [erotilte, seterotitle] = useState("")
+
+    const onToggleSnackBar = () => setVisible(!visible);
+    const onDismissSnackBar = () => setVisible(false);
+
+    const handlelogin = async () => {
+        try {
+            const response = await axios.post(`${DataBase}/login`, { id: formattedValue });
+            const { isDuplicate, fullRow } = response.data;
+
+            if (isDuplicate) {
+                // Save the fullRow data to your frontend state
+                // For example, using React hooks:
+                setuserData(fullRow);
             }
-            else {
-                console.log('Timeout completed after 2 seconds all is ok');
-            }
 
-        }, 20000);
-
-        return () => clearTimeout(timeoutId);
-
-    }, [checkfetch === false]);
-
-    useEffect(() => {
-
-        (async () => {
-            try {
-
-                const credentials = await Keychain.getGenericPassword();
-                if (credentials) {
-                    
-
-                    // Pass credentials to START screen and prevent going back
-                    props.navigation.dispatch(CommonActions.reset({
-                        index: 0,
-                        routes: [
-                            {
-                                name: 'BtabNev',
-                                params: credentials.username,
-                            },
-                        ],
-                    }));
-                } else {
-                    console.log("No credentials stored");
-                    setIsLoggedIn(true);
-                }
-            } catch (error) {
-                console.log("Keychain couldn't be accessed!", error);
-            }
-        })();
-    }, []);
-
-    const handleLogin = async () => {
-        const backendUrl = DataBase;
-        if (email !== "" && password !== "") {
-            try {
-                setcheckfetch(false)
-                const response = await axios.post(`${backendUrl}/login`, { email, password });
-
-                // check data fetch or not
-                if (response.data) {
-                    setcheckfetch(true)
-                }
-                console.log(response.data);
-                console.log("====>>  Happy Login <<======");
-                Keychain.setGenericPassword(email, password);
-                
-
-                // Pass credentials to START screen and prevent going back
-                /*  props.navigation.dispatch(CommonActions.navigate({
-                     name: 'DrawNev',
-                     params: email,
-                 })); */
-                props.navigation.dispatch(CommonActions.reset({
-                    index: 0,
-                    routes: [
-                        {
-                            name: 'BtabNev',
-                            params: email,
-                        },
-                    ],
-                }));
-            } catch (error) {
-                console.log('Error logging in:', error);
-                Alert.alert('Login Failed', 'Invalid email or password',
-                    [{ title: 'OK', onPress: setIsLoggedIn(true) }]);
-                setEmail("");
-                setPassword("");
-            }
-        } else {
-            console.log("EMAIL = ", email)
-            Alert.alert('Blanked field', 'try again', [{ title: 'OK', onPress: setIsLoggedIn(true) }]);
-
+            return isDuplicate;
+        } catch (error) {
+            console.error('Error checking duplicate key:', error);
+            return null;
         }
     };
 
 
 
 
+
+    const sendVerificationRequest = async () => {
+        try {
+            setgetOtp(2)
+            /* const response = await axios.post(`${DataBase}/sendVerification`, { phoneNumber: formattedValue });
+      
+            if (response.data.status === 'pending') {
+              console.log("before ", response.data.status)
+              setgetOtp(2)
+              
+            }  */
+        } catch (error) {
+            console.error('Error sending verification request:', error.message);
+        }
+    };
+
+    const checkVerificationCode = async () => {
+        try {
+            Alert.alert("welcome")
+            saveUserData(userData.email, formattedValue, userData.comment);
+            props.navigation.dispatch(CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: 'BtabNev',
+                        params: {
+                            email: userData.email,
+                            number: formattedValue,
+                            name: userData.comment,
+                        },
+                    },
+                ],
+            }));
+            /* const response = await axios.post(`${DataBase}/checkVerification`, {
+              phoneNumber: formattedValue,
+              verificationCode: verificationCode,
+            });
+      
+            if (response.data.status === 'approved') {
+              
+              console.log("after ", response.data.status)
+              Alert.alert('Success', 'OTP verified successfully');
+            }  */
+        } catch (error) {
+            console.error('Error checking verification code:', error.message);
+        }
+    };
+    const handleOtp = async () => {
+        const checkValid = phoneInput.current?.isValidNumber(formattedValue);
+
+        setchecklogin(false)
+        if (checkValid) {
+
+            const isDuplicate = await handlelogin();
+
+            if (!isDuplicate) {
+                setchecklogin(true)
+                seterotitle('unique/ this number is n0t registered');
+                onToggleSnackBar()
+                setFormattedValue("")
+                return;
+
+            }
+
+            if (isDuplicate) {
+                setchecklogin(true)
+                sendVerificationRequest()
+                seterotitle("This number  registered, ok")
+                onToggleSnackBar()
+                return;
+            }
+
+        }
+        else {
+            setchecklogin(true)
+            setFormattedValue('')
+            seterotitle("Number is Not Valid")
+            onToggleSnackBar()
+        }
+    };
+
+
+    //////
+
+
+    useEffect(() => {
+        // Fetch user data when the component mounts
+        fetchData();
+    }, []);
+    const fetchData = async () => {
+        // Call the getUserData function to retrieve user data
+        const userData = await getUserData();
+
+        if (userData) {
+            console.log('User Data in ProfilePage:', userData);
+            props.navigation.dispatch(CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: 'BtabNev',
+                        params: userData,
+                    },
+                ],
+            }));
+            setchecklogin(false)
+        } else {
+            console.log('User data not found.');
+            setchecklogin(true)
+        }
+    };
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View>
-                {
-                    isLoggedIn ? (
-                        <View>
+            {
+                checklogin ? (
+                    <View >
+                        {
+                            getOtp === 0 ? (
+                                <View style={{ marginTop: height / 5 }}>
+                                    <AntDesign name="login" size={height / 10} color={Colorf.c}
+                                        style={{ textAlign: "center", margin: '5%' }} />
 
-                            <View
-                                style={{
-                                    marginVertical: 20 * 3,
-                                    marginLeft: '2%',
-                                    marginRight: '2%',
-                                    borderRadius: 15
-                                }}
-                            >
-                                <TextInput placeholder="Email" style={{
-                                    backgroundColor: "#E5E5E6",
-                                    marginVertical: 3, borderRadius: 10
-                                }}
-                                    onChangeText={(text) => setEmail(text)}
-                                />
-                                <TextInput placeholder="Password" style={{
-                                    backgroundColor: "#E5E5E6",
-                                    marginVertical: 5, borderRadius: 10
-                                }}
-                                    onChangeText={(text) => setPassword(text)} />
-                            </View>
+                                    <Text style={{ textAlign: "center" }}>Login Pannel</Text>
+                                    <Text style={{ textAlign: "center", fontSize: 30 }}>Get Started Now!</Text>
 
+                                    <View style={{ alignItems: "center" }}>
+                                        <Button
+                                            icon={() => <MaterialIcons name="navigate-next" size={height / 30} color={Colorf.c} />}
+                                            mode="outlined"
+                                            onPress={() => setgetOtp(1)}
+                                            style={styles.btn}
+                                            theme={{ roundness: 2 }}
+                                            contentStyle={{ flexDirection: "row-reverse" }}
+                                            labelStyle={{
+                                                fontSize: height / 40, // Adjust the font size as needed
+                                                fontWeight: 500, // Use 'bold' for bold text
+                                                color: Colorf.c,
+                                                fontFamily: Colorf.f,
+                                            }}
+                                        >
+                                            Next
+                                        </Button>
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => props.navigation.navigate('REGIST')}
+                                    >
+                                        <Text
+                                            style={{
 
+                                                marginTop: '5%',
+                                                textAlign: "center",
+                                                fontSize: 18,
+                                            }}
+                                        >
+                                            Create new account
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ) : null
+                        }
 
+                        {
+                            getOtp == 1 ? (
+                                <View style={{ justifyContent: "center", alignItems: "center", marginTop: height / 8 }}>
+                                    <MaterialIcons name="phone-iphone" size={height / 10} color={Colorf.c} style={{ margin: '15%' }} />
+                                    <PhoneInput
+                                        ref={phoneInput}
+                                        defaultValue={formattedValue}
+                                        defaultCode="US"
+                                        layout="first"
+                                        onChangeFormattedText={(text) => setFormattedValue(text)}
+                                        withDarkTheme
+                                        withShadow
+                                        autoFocus
+                                    />
+                                    <View style={{ alignItems: "center" }}>
+                                        <Button
+                                            icon={() => <MaterialIcons name="navigate-next" size={height / 30} color={Colorf.c} />}
+                                            mode="outlined"
+                                            onPress={handleOtp}
+                                            style={styles.btn}
+                                            theme={{ roundness: 2 }}
+                                            contentStyle={{ flexDirection: "row-reverse" }}
+                                            labelStyle={{
+                                                fontSize: height / 40, // Adjust the font size as needed
+                                                fontWeight: 500, // Use 'bold' for bold text
+                                                color: Colorf.c,
+                                                fontFamily: Colorf.f,
+                                            }}
+                                        >
+                                            Next
+                                        </Button>
+                                    </View>
+                                </View>
+                            ) : null
+                        }
 
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setIsLoggedIn(false);
-                                    handleLogin();
-                                }}
-                                style={{
-                                    backgroundColor: "#0029D0",
-                                    padding: 15,
-                                    marginVertical: 10 * 3,
-                                    marginLeft: '2%',
-                                    marginRight: '2%',
-                                    borderRadius: 15,
-                                    shadowColor: "green",
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: Spacing,
-                                    },
-                                    shadowOpacity: 0.3,
-                                    shadowRadius: Spacing,
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        color: "white",
-                                        textAlign: "center",
-                                        fontSize: 22,
-                                        fontWeight: "bold"
-                                    }}
-                                >
-                                    Sign in
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => props.navigation.navigate('REGIST')}
-                                style={{
-                                    padding: Spacing,
-                                }}
-                            >
-                                <Text
-                                    style={{
+                        {
+                            getOtp == 2 ? (
+                                <View style={{ marginTop: height / 8 }} >
+                                    <MaterialIcons name="perm-device-information" size={height / 10} color={Colorf.c}
+                                        style={{ margin: '15%', textAlign: "center" }} />
 
-                                        color: "#616082",
-                                        textAlign: "center",
-                                        fontSize: 18,
-                                    }}
-                                >
-                                    Create new account
-                                </Text>
-                            </TouchableOpacity>
+                                    <TextInput
+                                        placeholder="Enter OTP"
+                                        value={verificationCode}
+                                        onChangeText={(text) => setVerificationCode(text)}
+                                        keyboardType="numeric"
+                                        style={styles.textinput}
+                                        activeUnderlineColor={Colorf.c}
+                                    />
+                                    <View style={{ alignItems: "center" }}>
+                                        <Button
+                                            icon={() => <MaterialIcons name="navigate-next" size={height / 30} color={Colorf.c} />}
+                                            mode="outlined"
+                                            onPress={checkVerificationCode}
+                                            style={styles.btn}
+                                            theme={{ roundness: 2 }}
+                                            contentStyle={{ flexDirection: "row-reverse" }}
+                                            labelStyle={{
+                                                fontSize: height / 40, // Adjust the font size as needed
+                                                fontWeight: 500, // Use 'bold' for bold text
+                                                color: Colorf.c,
+                                                fontFamily: Colorf.f,
+                                            }}
+                                        >
+                                            Next
+                                        </Button>
+                                    </View>
+                                </View>
+                            ) : null
+                        }
 
-
-                        </View>
-                    ) : (
-                        <View>
-                            <ALERT
-                                visible={alertact}
-                                hidevisible={(val) => { setalertact({ msg: "", bull: val, icon: "", des: "" }) }}
-                            />
-                            <Spinner
-                                visible={true}
-                                textContent={'Loading...'}
-                                textStyle={styles.spinnerText}
-                            />
-                        </View>
-                    )
-                }
-            </View>
+                    </View>
+                ) : (
+                    <Spinner
+                        visible={true}
+                        textContent={'Loading...'}
+                        textStyle={styles.spinnerText}
+                    />
+                )
+            }
+            <Snackbar
+                visible={visible}
+                onDismiss={onDismissSnackBar}
+                duration={2000}
+                style={{  backgroundColor: Colorf.d }}
+            >
+                {erotilte}
+            </Snackbar>
         </SafeAreaView>
     );
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    txt_area: {
+        height: height / 5,
+        backgroundColor: "white",
+        borderRadius: 25,
+        marginLeft: '3%',
+        marginRight: '3%',
+    },
+    textinput: {
+        marginLeft: '2%',
+        marginRight: '2%',
+        fontWeight: "700",
+        marginTop: '3%',
+        maxHeight: 85,
+        backgroundColor: "white",
+    },
+    btn: {
+        backgroundColor: "white",
+        marginTop: '5%',
+        width: height / 3,
+    },
+
+    steptxt: {
+        fontSize: 20,
+        fontWeight: "500",
+        color: Colorf.c,
+        textAlign: "center",
+        marginBottom: '5%'
+    },
+
+})
 
 
