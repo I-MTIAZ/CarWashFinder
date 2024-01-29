@@ -14,17 +14,18 @@ import Feather from 'react-native-vector-icons/Feather'  //package
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons' // cash-plus  qrcode-scan
-
+import { Colorf } from '../Constrains/COLOR';
+import * as Progress from 'react-native-progress';
 
 
 const { height } = Dimensions.get("window");
 
 const btncolor = "#00674b"
-const Fontsize = height/40
+const Fontsize = height / 40
 const Fontweight = 'bold'
 const Fontfamily = ""
 const MODE = "outlined"
-const logosize = height/25
+const logosize = height / 25
 
 
 LogBox.ignoreLogs([
@@ -107,7 +108,7 @@ export const Start = (props) => {
     props.navigation.navigate('NPLACE')
   }
   const handleqrcode = () => {
-    props.navigation.navigate('QRSCAN')
+    props.navigation.navigate('QRSCAN', props.route.params)
   }
 
   const handlerecharge = () => {
@@ -117,15 +118,51 @@ export const Start = (props) => {
     props.navigation.navigate('BUYPACKAGE')
   }
 
-
+  const formatText = (progress) => {
+    return <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <MaterialCommunityIcons
+      name="trophy"
+      size={height/20}
+      color={Colorf.c} 
+    />
+    <Text style={{ marginLeft: 5,fontWeight:"bold",fontSize:height/35 }}>{progress}%</Text>
+  </View>
+  };
+  const d = 50
 
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? 0 : 0 }}>
-      <View style={{ flex: 1, justifyContent: "center" }}>
+      <View style={{ flex: 1,}}>
         <NETINFO />
-        <View style={{ margin: height / 45 }}>
-          
+        <View style={{ margin: height / 45, marginBottom: height / 10, }}>
+
+          <View style={{ justifyContent: "center", flexDirection: "row",marginTop:'5%',marginBottom:'3%' }}>
+
+            <View style={{
+              height: height/5.8, width: height/5.8, borderRadius: height/2.9, borderWidth: 2.5, borderColor: Colorf.c, alignItems: "center", justifyContent: "center",
+              marginHorizontal: '5%'
+            }}>
+              <View style={{ flexDirection: "row", }}>
+                <Text style={{ fontSize: height/30 }}>50</Text>
+                <MaterialCommunityIcons
+                  name="currency-bdt"
+                  size={height/26}
+                  color={btncolor} />
+              </View>
+              <Text style={{ fontSize: height/35 }}>Balance</Text>
+            </View>
+
+            <View style={{ flexDirection: "row", justifyContent: "center", marginHorizontal: '5%' }}>
+              <Progress.Circle progress={0.3} size={height/5.8}
+                color={Colorf.d} thickness={height/180} borderWidth={2.5}
+                formatText={formatText}
+                showsText
+                borderColor={Colorf.d}
+              />
+
+            </View>
+          </View>
 
           <Button
             mode={MODE}
@@ -137,43 +174,45 @@ export const Start = (props) => {
               fontWeight: Fontweight, // Use 'bold' for bold text
               color: btncolor,
               fontFamily: Fontfamily,
-              margin:0,
-              padding:0
+              margin: 0,
+              padding: 0,
+
+
             }}
             icon={({ size, color }) => (
               <Feather name="map" size={logosize} color={btncolor} />
             )}
-            
+
             loading={isloading}
             disabled={isloading}
-            theme={{ roundness: 3 }} 
+            theme={{ roundness: 3 }}
           >
             Go to Map
           </Button>
 
           <TouchableOpacity onPress={handlenewplace} style={styles.btntou}>
-          <MaterialIcons name="add-location-alt" size={logosize} color={btncolor} />
+            <MaterialIcons name="add-location-alt" size={logosize} color={btncolor} />
             <View style={{ marginLeft: '2%' }}>
               <Text style={styles.btn_txt}>Add New Parking</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleqrcode} style={styles.btntou}>
-          <MaterialCommunityIcons name="qrcode-scan" size={logosize} color={btncolor} />
+            <MaterialCommunityIcons name="qrcode-scan" size={logosize} color={btncolor} />
             <View style={{ marginLeft: '2%' }}>
               <Text style={styles.btn_txt}>QrCode Scanner</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handlerecharge} style={styles.btntou}>
-          <MaterialCommunityIcons name="cash-plus" size={logosize} color={btncolor} />
+            <MaterialCommunityIcons name="cash-plus" size={logosize} color={btncolor} />
             <View style={{ marginLeft: '2%' }}>
               <Text style={styles.btn_txt}>Get Recharge</Text>
             </View>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handlebuypackage} style={styles.btntou}>
-          <Fontisto name="shopping-package" size={logosize} color={btncolor} />
+            <Fontisto name="shopping-package" size={logosize} color={btncolor} />
             <View style={{ marginLeft: '2%' }}>
               <Text style={styles.btn_txt}> Buy Package</Text>
             </View>
@@ -191,26 +230,30 @@ export const Start = (props) => {
 const styles = StyleSheet.create({
 
   btn: {
-    marginVertical: height/45,
-    height: height / 11,
+    marginVertical: height / 45,
+    height: height / 13,
     justifyContent: "center",
+    borderWidth: 1.8,
+    borderColor: Colorf.c
+
   },
   btntou: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: height / 11,
-    borderRadius:15,
-    borderColor:'black',
-    borderWidth:0.5,
+    height: height / 13,
+    borderRadius: 15,
+    borderColor: Colorf.c,
+    borderWidth: 1.7,
     //justifyContent:"center",
-    marginVertical: height/45,
-    paddingLeft:height/15
-},
-btn_txt:{
-  color:btncolor,
-  fontSize:Fontsize,
-  fontWeight: Fontweight,
-  fontFamily:Fontfamily
-}
+    marginVertical: height / 45,
+    paddingLeft: height / 15,
+
+  },
+  btn_txt: {
+    color: btncolor,
+    fontSize: Fontsize,
+    fontWeight: Fontweight,
+    fontFamily: Fontfamily
+  }
 });
 

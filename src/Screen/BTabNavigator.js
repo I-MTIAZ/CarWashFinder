@@ -32,13 +32,15 @@ export const BTabNavigator = (props) => {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 15,
-          left: height / 35,
-          right: height / 35,
+          bottom: 0,
+          left: 0,
+          right: 0,
           elevation: 0,
-          backgroundColor: '#ffffff',
-          borderRadius: 15,
+          backgroundColor: "white",
           height: height / 9,
+          borderColor:Colorf.c,
+          borderTopWidth:2,
+          
           ...styles.shadow
         }
 
@@ -57,16 +59,19 @@ export const BTabNavigator = (props) => {
       >
         {() => <Start {...props} />}
       </Tab.Screen>
-      {/* { top: -30, height: 70, width: 70, borderRadius: 35,
-                backgroundColor:"#991b1b"} */}
+
       <Tab.Screen name="Reward" options={{
         tabBarIcon: ({ focused }) => (
           <View
-            style={[styles.iconcontainer, ]}
+            style={[styles.iconcontainer, {
+              top: -30, height: 80, width: 80, borderRadius: 40,
+              backgroundColor:"white",borderColor:Colorf.c,
+              borderWidth:2,
+            }]}
           >
             <FontAwesome5 name="trophy" color={focused ? '#00674b' : '#748c94'}
               size={height / 20} />
-            <Text style={{ color: focused ? '#00674b' : '#748c94' }}>reward</Text>
+            <Text style={{ color: focused ? '#00674b' : '#748c94' }}>Reward</Text>
           </View>
         ),
         headerShown: false,

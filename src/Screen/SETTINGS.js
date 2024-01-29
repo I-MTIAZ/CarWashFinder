@@ -9,11 +9,13 @@ import AntDesign from 'react-native-vector-icons/AntDesign' //profile // infocir
 import Entypo from 'react-native-vector-icons/Entypo' // log-out
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons' //account-cancel // cash-plus
 
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 import axios from 'axios';
+import { Colorf } from '../Constrains/COLOR';
 const { height } = Dimensions.get("window");
 const logoheight = height / 30
 
@@ -79,7 +81,7 @@ export const SETTINGS = (props) => {
 
     return (
         <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? '2%' : 0 }}>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor:Colorf.b }}>
 
                 <View style={{ alignItems: "center", marginTop: '8%' }}>
                     <FontAwesome name="user-circle-o" color='#00674b'
