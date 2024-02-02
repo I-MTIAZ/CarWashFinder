@@ -38,7 +38,7 @@ export const BTabNavigator = (props) => {
           elevation: 0,
           backgroundColor: "white",
           height: height / 9,
-          borderColor:Colorf.c,
+          borderColor:Colorf.c1,
           borderTopWidth:2,
           
           ...styles.shadow
@@ -65,7 +65,7 @@ export const BTabNavigator = (props) => {
           <View
             style={[styles.iconcontainer, {
               top: -30, height: 80, width: 80, borderRadius: 40,
-              backgroundColor:"white",borderColor:Colorf.c,
+              backgroundColor:"white"  ,borderColor: focused ? Colorf.c :Colorf.c1,
               borderWidth:2,
             }]}
           >

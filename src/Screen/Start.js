@@ -37,7 +37,7 @@ LogBox.ignoreLogs([
 
 export const Start = (props) => {
 
-
+  const [progress, setProgress] = useState();
   const [destlocation, setdestlocation] = useState({});
   //
   const [isloading, setislaoding] = useState(true)
@@ -100,7 +100,9 @@ export const Start = (props) => {
   }, []);
 
 
-
+  useEffect(() => {
+    setProgress(0.5);
+  }, []);
 
 
 
@@ -120,103 +122,106 @@ export const Start = (props) => {
 
   const formatText = (progress) => {
     return <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-    <MaterialCommunityIcons
-      name="trophy"
-      size={height/20}
-      color={Colorf.c} 
-    />
-    <Text style={{ marginLeft: 5,fontWeight:"bold",fontSize:height/35 }}>{progress}%</Text>
-  </View>
+      <MaterialCommunityIcons
+        name="trophy"
+        size={height / 20}
+        color={Colorf.c1}
+      />
+      <Text style={{ marginLeft: 5, fontWeight: "bold", fontSize: height / 35, color: Colorf.c1 }}>{Math.round(progress * 100)}%</Text>
+    </View>
   };
   const d = 50
 
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? 0 : 0 }}>
-      <View style={{ flex: 1,}}>
+      <View style={{ flex: 1, }}>
         <NETINFO />
-        <View style={{ margin: height / 45, marginBottom: height / 10, }}>
+        <View style={{ marginBottom: height / 10, }}>
 
-          <View style={{ justifyContent: "center", flexDirection: "row",marginTop:'5%',marginBottom:'3%' }}>
+          <View style={{ justifyContent: "center", flexDirection: "row", marginBottom: '3%', backgroundColor:Colorf.c, width: '100%', height: height / 4.5, paddingTop: '5%' }}>
 
             <View style={{
-              height: height/5.8, width: height/5.8, borderRadius: height/2.9, borderWidth: 2.5, borderColor: Colorf.c, alignItems: "center", justifyContent: "center",
+              height: height / 5.8, width: height / 5.8, borderRadius: height / 2.9, borderWidth: 2.5,
+              borderColor: Colorf.c1, alignItems: "center", justifyContent: "center",
               marginHorizontal: '5%'
             }}>
               <View style={{ flexDirection: "row", }}>
-                <Text style={{ fontSize: height/30 }}>50</Text>
+                <Text style={{ fontSize: height / 30, fontWeight: "bold", color: Colorf.c1 }}>50</Text>
                 <MaterialCommunityIcons
                   name="currency-bdt"
-                  size={height/26}
-                  color={btncolor} />
+                  size={height / 25}
+                  color={Colorf.c1} />
               </View>
-              <Text style={{ fontSize: height/35 }}>Balance</Text>
+              <Text style={{ fontSize: height / 35, fontWeight: "500", color: Colorf.c1 }}>Balance</Text>
             </View>
 
             <View style={{ flexDirection: "row", justifyContent: "center", marginHorizontal: '5%' }}>
-              <Progress.Circle progress={0.3} size={height/5.8}
-                color={Colorf.d} thickness={height/180} borderWidth={2.5}
+              <Progress.Circle progress={progress} size={height / 5.8}
+                color={Colorf.c1} thickness={height / 150} borderWidth={2.5}
                 formatText={formatText}
                 showsText
-                borderColor={Colorf.d}
+                borderColor={Colorf.c1}
               />
 
             </View>
           </View>
 
-          <Button
-            mode={MODE}
-            style={styles.btn}
-            onPress={onDone}
-            contentStyle={{ flexDirection: 'row', alignItems: 'center', marginLeft: '10%', justifyContent: 'flex-start', padding: 0, }}
-            labelStyle={{
-              fontSize: Fontsize, // Adjust the font size as needed
-              fontWeight: Fontweight, // Use 'bold' for bold text
-              color: btncolor,
-              fontFamily: Fontfamily,
-              margin: 0,
-              padding: 0,
+          <View style={{marginLeft:'2%',marginRight:'2%'}}>
+            <Button
+              mode={MODE}
+              style={styles.btn}
+              onPress={onDone}
+              contentStyle={{ flexDirection: 'row', alignItems: 'center', marginLeft: '10%', justifyContent: 'flex-start', padding: 0, }}
+              labelStyle={{
+                fontSize: Fontsize, // Adjust the font size as needed
+                fontWeight: Fontweight, // Use 'bold' for bold text
+                color: btncolor,
+                fontFamily: Fontfamily,
+                margin: 0,
+                padding: 0,
 
 
-            }}
-            icon={({ size, color }) => (
-              <Feather name="map" size={logosize} color={btncolor} />
-            )}
+              }}
+              icon={({ size, color }) => (
+                <Feather name="map" size={logosize} color={btncolor} />
+              )}
 
-            loading={isloading}
-            disabled={isloading}
-            theme={{ roundness: 3 }}
-          >
-            Go to Map
-          </Button>
+              loading={isloading}
+              disabled={isloading}
+              theme={{ roundness: 3 }}
+            >
+              Go to Map
+            </Button>
 
-          <TouchableOpacity onPress={handlenewplace} style={styles.btntou}>
-            <MaterialIcons name="add-location-alt" size={logosize} color={btncolor} />
-            <View style={{ marginLeft: '2%' }}>
-              <Text style={styles.btn_txt}>Add New Parking</Text>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={handlenewplace} style={styles.btntou}>
+              <MaterialIcons name="add-location-alt" size={logosize} color={btncolor} />
+              <View style={{ marginLeft: '2%' }}>
+                <Text style={styles.btn_txt}>Add New Parking</Text>
+              </View>
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleqrcode} style={styles.btntou}>
-            <MaterialCommunityIcons name="qrcode-scan" size={logosize} color={btncolor} />
-            <View style={{ marginLeft: '2%' }}>
-              <Text style={styles.btn_txt}>QrCode Scanner</Text>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={handleqrcode} style={styles.btntou}>
+              <MaterialCommunityIcons name="qrcode-scan" size={logosize} color={btncolor} />
+              <View style={{ marginLeft: '2%' }}>
+                <Text style={styles.btn_txt}>QrCode Scanner</Text>
+              </View>
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={handlerecharge} style={styles.btntou}>
-            <MaterialCommunityIcons name="cash-plus" size={logosize} color={btncolor} />
-            <View style={{ marginLeft: '2%' }}>
-              <Text style={styles.btn_txt}>Get Recharge</Text>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={handlerecharge} style={styles.btntou}>
+              <MaterialCommunityIcons name="cash-plus" size={logosize} color={btncolor} />
+              <View style={{ marginLeft: '2%' }}>
+                <Text style={styles.btn_txt}>Get Recharge</Text>
+              </View>
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={handlebuypackage} style={styles.btntou}>
-            <Fontisto name="shopping-package" size={logosize} color={btncolor} />
-            <View style={{ marginLeft: '2%' }}>
-              <Text style={styles.btn_txt}> Buy Package</Text>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={handlebuypackage} style={styles.btntou}>
+              <Fontisto name="shopping-package" size={logosize} color={btncolor} />
+              <View style={{ marginLeft: '2%' }}>
+                <Text style={styles.btn_txt}> Buy Package</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
 
         </View>
 
@@ -234,7 +239,8 @@ const styles = StyleSheet.create({
     height: height / 13,
     justifyContent: "center",
     borderWidth: 1.8,
-    borderColor: Colorf.c
+    borderColor: Colorf.c1,
+    backgroundColor: "white"
 
   },
   btntou: {
@@ -242,11 +248,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: height / 13,
     borderRadius: 15,
-    borderColor: Colorf.c,
+    borderColor: Colorf.c1,
     borderWidth: 1.7,
     //justifyContent:"center",
     marginVertical: height / 45,
     paddingLeft: height / 15,
+    backgroundColor: "white"
 
   },
   btn_txt: {

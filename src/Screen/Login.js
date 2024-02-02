@@ -8,7 +8,6 @@ import {
     Dimensions
 } from "react-native";
 import React, { useEffect, useState, useRef } from 'react';
-import * as Keychain from "react-native-keychain";
 import { DataBase } from "../Constrains/GoogleApi";
 import { CommonActions } from '@react-navigation/native';
 import axios from 'axios';
@@ -16,17 +15,16 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { Snackbar, TextInput, Button } from 'react-native-paper';
 import { Colorf } from '../Constrains/COLOR';
 import PhoneInput from 'react-native-phone-number-input';
-import { isValidEmail } from '../Helperfuncton/Helperfun'
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
+
 const { height } = Dimensions.get("window");
 import { saveUserData, getUserData } from '../Helperfuncton/Asstore'
 
 import AntDesign from 'react-native-vector-icons/AntDesign'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 export const Login = (props) => {
-    const [checklogin, setchecklogin] = useState(false)
+    const [checklogin, setchecklogin] = useState(true)
     const [email, setEmail] = useState('')
     const [formattedValue, setFormattedValue] = useState("");
     const [uname, setuname] = useState("")
@@ -47,13 +45,14 @@ export const Login = (props) => {
 
     const handlelogin = async () => {
         try {
-            const response = await axios.post(`${DataBase}/login`, { id: formattedValue });
+            const response = await axios.post(`${DataBase}/login`, { formattedValue });
             const { isDuplicate, fullRow } = response.data;
 
             if (isDuplicate) {
                 // Save the fullRow data to your frontend state
                 // For example, using React hooks:
                 setuserData(fullRow);
+                console.log(fullRow)
             }
 
             return isDuplicate;
@@ -85,7 +84,7 @@ export const Login = (props) => {
     const checkVerificationCode = async () => {
         try {
             Alert.alert("welcome")
-            saveUserData(userData.email, formattedValue, userData.comment);
+            saveUserData(userData.email, formattedValue, userData.uname);
             props.navigation.dispatch(CommonActions.reset({
                 index: 0,
                 routes: [
@@ -94,7 +93,8 @@ export const Login = (props) => {
                         params: {
                             email: userData.email,
                             number: formattedValue,
-                            name: userData.comment,
+                            name: userData.uname,
+                            id: userData.Uid
                         },
                     },
                 ],
@@ -115,33 +115,44 @@ export const Login = (props) => {
     };
     const handleOtp = async () => {
         const checkValid = phoneInput.current?.isValidNumber(formattedValue);
-
+        console.log(formattedValue)
         setchecklogin(false)
         if (checkValid) {
 
-            const isDuplicate = await handlelogin();
+            if (formattedValue.length === 12) {
+                const isDuplicate = await handlelogin();
 
-            if (!isDuplicate) {
-                setchecklogin(true)
-                seterotitle('unique/ this number is n0t registered');
-                onToggleSnackBar()
-                setFormattedValue("")
-                return;
+                if (!isDuplicate) {
+                    setchecklogin(true)
+                    seterotitle('unique/ this number is n0t registered');
+                    onToggleSnackBar()
+                    setFormattedValue("")
 
+                    return;
+
+                }
+
+                if (isDuplicate) {
+                    setchecklogin(true)
+                    sendVerificationRequest()
+                    seterotitle("This number  registered, ok")
+                    onToggleSnackBar()
+                    return;
+                }
             }
-
-            if (isDuplicate) {
+            else {
+                setFormattedValue("")
                 setchecklogin(true)
-                sendVerificationRequest()
-                seterotitle("This number  registered, ok")
+                seterotitle("Dont use country code")
                 onToggleSnackBar()
-                return;
+
             }
 
         }
         else {
             setchecklogin(true)
             setFormattedValue('')
+
             seterotitle("Number is Not Valid")
             onToggleSnackBar()
         }
@@ -151,7 +162,7 @@ export const Login = (props) => {
     //////
 
 
-    useEffect(() => {
+    /* useEffect(() => {
         // Fetch user data when the component mounts
         fetchData();
     }, []);
@@ -175,7 +186,7 @@ export const Login = (props) => {
             console.log('User data not found.');
             setchecklogin(true)
         }
-    };
+    }; */
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -312,7 +323,7 @@ export const Login = (props) => {
                 visible={visible}
                 onDismiss={onDismissSnackBar}
                 duration={2000}
-                style={{  backgroundColor: Colorf.d }}
+                style={{ backgroundColor: Colorf.d }}
             >
                 {erotilte}
             </Snackbar>

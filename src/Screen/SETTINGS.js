@@ -21,9 +21,8 @@ const logoheight = height / 30
 
 export const SETTINGS = (props) => {
 
-    const [isSwitchOn, setIsSwitchOn] = React.useState(false);
-    const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
 
+    console.log(props.route.params.id)
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem('email');
@@ -50,10 +49,10 @@ export const SETTINGS = (props) => {
     }
 
     const Delete_Act = () => {
-        const email = props.route.params; // Replace with the actual email
+        const id = props.route.params.id; // Assuming id is passed correctly
 
         axios
-            .delete(`${DataBase}/deleteAccount/${email}`)
+            .delete(`${DataBase}/deleteAccount/${id}`)
             .then((response) => {
                 if (response.status === 200) {
                     Alert.alert('Success', 'Account deleted successfully');
@@ -81,7 +80,7 @@ export const SETTINGS = (props) => {
 
     return (
         <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? '2%' : 0 }}>
-            <View style={{ flex: 1, backgroundColor:Colorf.b }}>
+            <View style={{ flex: 1, backgroundColor: Colorf.b }}>
 
                 <View style={{ alignItems: "center", marginTop: '8%' }}>
                     <FontAwesome name="user-circle-o" color='#00674b'
@@ -128,9 +127,7 @@ export const SETTINGS = (props) => {
                     </TouchableOpacity>
 
 
-                    <View style={styles.btn}>
-                        <Switch value={isSwitchOn} onValueChange={onToggleSwitch} />
-                    </View>
+
 
                 </View>
 

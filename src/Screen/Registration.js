@@ -25,7 +25,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 
 export const Registration = (props) => {
-  const [checklogin, setchecklogin] = useState(false)
+  const [checklogin, setchecklogin] = useState(true)
   const [email, setEmail] = useState('')
   const [formattedValue, setFormattedValue] = useState("");
   const [uname, setuname] = useState("")
@@ -59,8 +59,8 @@ export const Registration = (props) => {
       const response = await axios.post(`${DataBase}/checkDuplicateKey`, { id: formattedValue });
       return response.data.isDuplicate;
     } catch (error) {
-      console.error('Error checking duplicate key:', error);
-      return null;
+      console.log('Error checking duplicate key:', error);
+      return 500;
     }
   };
 
@@ -102,26 +102,42 @@ export const Registration = (props) => {
   const handleOtp = async () => {
     setchecklogin(false)
     const checkValid = phoneInput.current?.isValidNumber(formattedValue);
+    console.log(formattedValue)
 
 
     if (checkValid) {
 
-      const isDuplicate = await checkunique();
+      if (formattedValue.length === 12) {
+        const isDuplicate = await checkunique();
 
-      if (!isDuplicate) {
-        setchecklogin(true)
-        console.log('unique');
-        sendVerificationRequest()
+        if (!isDuplicate) {
+          setchecklogin(true)
+          console.log('unique');
+          sendVerificationRequest()
 
-        return;
+          return;
+        }
+
+        if (isDuplicate) {
+          setchecklogin(true)
+          seterotitle("This number already registered, use different number")
+          onToggleSnackBar()
+
+          return;
+        }
+        if (isDuplicate === 500) {
+          setchecklogin(true)
+          seterotitle("something is wrong")
+          onToggleSnackBar()
+
+          return;
+        }
       }
-
-      if (isDuplicate) {
+      else {
+        setFormattedValue("")
         setchecklogin(true)
-        seterotitle("This number already registered, use different number")
+        seterotitle("Dont use country code")
         onToggleSnackBar()
-
-        return;
       }
     }
     else {
@@ -149,7 +165,7 @@ export const Registration = (props) => {
   //////
 
 
-  useEffect(() => {
+  /* useEffect(() => {
     // Fetch user data when the component mounts
     fetchData();
   }, []);
@@ -173,18 +189,20 @@ export const Registration = (props) => {
       console.log('User data not found.');
       setchecklogin(true)
     }
-  };
+  }; */
   const handleSignUp = () => {
+
     setchecklogin(false)
     const isEmailValid = isValidEmail(email);
     if (isEmailValid) {
 
       axios.post(`${DataBase}/register`, { email, formattedValue, uname })
         .then(response => {
-          const data = response.data;
-          console.log(data);
+          const insertedUser = response.data;
+          console.log(insertedUser);
+          console.log(insertedUser.user.Uid);
 
-          if (data.success) {
+          if (insertedUser) {
             // Registration successful
             saveUserData(email, formattedValue, uname);
             props.navigation.dispatch(CommonActions.reset({
@@ -196,6 +214,7 @@ export const Registration = (props) => {
                     email: email,
                     number: formattedValue,
                     name: uname,
+                    id: insertedUser.user.Uid
                   },
                 },
               ],

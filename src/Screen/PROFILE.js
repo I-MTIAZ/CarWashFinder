@@ -9,6 +9,7 @@ import { HANDLEPROFILE } from './HANDLEPROFILE';
 const { height } = Dimensions.get("window");
 
 export const PROFILE = (props) => {
+    console.log(props.route.params,"profile")
 
     const logoheight = height / 25
     //console.log(props.route.params)

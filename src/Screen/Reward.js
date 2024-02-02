@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native';
 import { Colorf } from '../Constrains/COLOR';
 import * as Progress from 'react-native-progress';
@@ -7,32 +7,36 @@ import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons' //
 import { Platinum, Ptitle } from '../Helperfuncton/Handlereward';
 const { height } = Dimensions.get("window");
 import { Snackbar } from 'react-native-paper';
-import { findFocusedRoute } from '@react-navigation/native';
+
 
 
 export const Reward = () => {
 
     /// Data base ///
 
-    const [progress, setProgress] = useState(0.5);
-    const [progressNo, setProgressNo] = useState(0);
-    const [progressColor, setProgressColor] = useState(Colorf.c);
+    const [progress, setProgress] = useState(0);
+    const [progressNo, setProgressNo] = useState(2);
     const [points, setPoints] = useState(100);
 
     /// Data base ///
 
     const [focusedIndex, setFocusedIndex] = useState(null);
-    const buttonNames = ['Platinum', 'Diamond', 'Gold'];
+
     const [Pageno, setPageno] = useState(1)
     const onToggleSnackBar = () => setVisible(!visible);
     const onDismissSnackBar = () => setVisible(false);
     const [visible, setVisible] = useState(false);
+    const [backgroundcolor, setbackgroundcolor] = useState();
+
+    // Names & color
+    const buttonNames = ['Platinum', 'Diamond', 'Gold'];
+    const progressColor = [Colorf.platinum, Colorf.diamond, Colorf.gold];
 
     const handleplatinum = (index) => {
         const handlepoints = Platinum(index, points)
         if (handlepoints >= 0) {
             setPoints(handlepoints)
-            
+
         }
         else {
             onToggleSnackBar()
@@ -41,53 +45,89 @@ export const Reward = () => {
     };
 
     const handleFocus = (index) => {
-        setFocusedIndex(index);
+        if (index > 0) {
+            setFocusedIndex(index - 1);
+            setbackgroundcolor(progressColor[index - 1])
+            setPageno(index)
+            if (index > progressNo) {
+                setProgress(0)
+            }
+            else if (index < progressNo) {
+                setProgress(1)
+            }
+            else {
+                setProgress(0.5)
+            }
+        }
+        else {
+            setPageno(progressNo)
+            setFocusedIndex(progressNo - 1)
+            setProgress(0.5)
+            setbackgroundcolor(progressColor[progressNo - 1])
+        }
+
     };
+
+
+    useEffect(() => {
+        handleFocus()
+    }, []);
+
 
 
     const formatText = (progress) => {
         return <View style={{}}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: "center", }}>
+            <Text style={{
+                fontSize: height / 40, fontWeight: "bold", textAlign: "center", marginBottom: height / 50,
+                color: Colorf.c
+            }}>Platinim</Text>
+            <View style={{
+                flexDirection: 'row', alignItems: 'center', justifyContent: "center",
+                marginBottom: height / 80
+            }}>
+
                 <MaterialCommunityIcons
                     name="trophy"
-                    size={height/18}
+                    size={height / 18}
                     color={Colorf.c}
                 />
-                <Text style={{ marginLeft: 5, fontWeight: "bold", fontSize: height/35 }}>{Math.round(progress * 100)}%</Text>
+                <Text style={{ marginLeft: 5, fontWeight: "bold", fontSize: height / 35, color: Colorf.c }}>{Math.round(progress * 100)}%</Text>
             </View>
-            <Text style={{ fontSize: height/40, fontWeight: "bold" }}>Total Points {points}</Text>
-            <Text style={{ fontSize: height/40, fontWeight: "bold",textAlign:"center" }}>Platinim</Text>
+            <Text style={{ fontSize: height / 50, fontWeight: "bold", color: Colorf.c }}>Total Points {points}</Text>
         </View>
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? '4%' : '4%',
-        backgroundColor: Colorf.b }}>
+        <SafeAreaView style={{
+            flex: 1, paddingTop: Platform.OS === 'android' ? '0%' : '0%',
+            backgroundColor: Colorf.b
+        }}>
             <View style={{ backgroundColor: Colorf.b, flex: 1 }}>
 
 
-                <View style={{ alignItems: "center" }}>
-                    <Progress.Circle progress={progress} size={height/3.6}
-                        color={Colorf.d} thickness={height/160} borderWidth={2.5}
+                <View style={[styles.topcontainer, { backgroundColor: backgroundcolor }]}>
+                    
+                    <Progress.Circle progress={progress} size={height / 4}
+                        color={Colorf.c} thickness={height / 160} borderWidth={2.5}
                         formatText={formatText}
                         showsText
-                        borderColor={Colorf.d}
+                        borderColor={Colorf.c}
                     />
                 </View>
 
-                <View style={styles.topcontainer}>
+                <View style={styles.btnheader}>
                     {buttonNames.map((buttonName, index) => (
                         <TouchableOpacity
                             key={index}
-                            onPress={() => handleFocus(index)}
+                            onPress={() => handleFocus(index + 1)}
                             style={[styles.topbtn, focusedIndex === index && {
                                 borderBottomColor: Colorf.c,
                                 borderBottomWidth: 2,
                             }]}
                         >
                             <Text style={[focusedIndex === index && {
-                                color:Colorf.c
-                            },{fontWeight:"bold"}]}>{buttonName}</Text>
+                                color: Colorf.c
+                            }, { fontWeight: "bold" }]}>{buttonName}</Text>
 
 
                         </TouchableOpacity>
@@ -97,7 +137,7 @@ export const Reward = () => {
                 {
                     Pageno === 1 ? (
 
-                        <View style={{marginTop:'5%'}}>
+                        <View style={{ marginTop: '5%', }}>
                             {Object.values(Ptitle).map((value, index) => (
                                 <TouchableOpacity
                                     key={index}
@@ -111,7 +151,7 @@ export const Reward = () => {
                                         }}>
                                             <SimpleLineIcons
                                                 name="badge"
-                                                size={height/25}
+                                                size={height / 25}
                                                 color={Colorf.c}
                                             />
                                         </View>
@@ -145,14 +185,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: height / 9,
         borderRadius: 15,
-        borderColor: Colorf.c,
+        borderColor: Colorf.c1,
         borderWidth: 1.7,
         //justifyContent:"center",
         marginVertical: '3%',
         paddingLeft: height / 15,
         width: "90%",
         marginLeft: "auto",
-        marginRight: 'auto'
+        marginRight: 'auto',
+        backgroundColor: "white"
 
 
     },
@@ -163,20 +204,26 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         width: '33%',
     },
-    topcontainer: {
+    btnheader: {
         flexDirection: "row",
         marginLeft: 'auto',
         marginRight: 'auto',
         marginTop: '2%'
     },
     rewbody: {
-        fontSize: height/45,
+        fontSize: height / 45,
         fontWeight: "800"
     },
     rewtitle: {
-        fontSize: height/40,
+        fontSize: height / 40,
         fontWeight: "bold"
     },
+    topcontainer: {
+        alignItems: "center",
+        backgroundColor: Colorf.c1,
+        height: height / 3.5,
+        justifyContent: "center"
+    }
 })
 
 
