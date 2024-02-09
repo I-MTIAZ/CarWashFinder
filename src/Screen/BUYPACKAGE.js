@@ -1,11 +1,65 @@
-import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import { Verify } from './Verify';
+import React, { useState } from 'react';
+import { View, StyleSheet, Text, Button } from 'react-native';
+import * as Progress from 'react-native-progress';
+import { Colorf } from '../Constrains/COLOR';
+
 
 export const BUYPACKAGE = () => {
+    const [progress, setProgress] = useState(0);
+    const [data, setData] = useState(false);
+
+    const handlePress = () => {
+        // Reset progress to 0
+        setProgress(0);
+
+        // Start increasing progress every second
+        const intervalId = setInterval(() => {
+            // Check if data is true, if true, stop the interval and set progress to 100%
+            if (data) {
+                clearInterval(intervalId);
+                setProgress(100);
+            } else {
+                // Increment progress by 3.33 (since 30 seconds / 90 steps = 0.3333)
+                setProgress(prevProgress => prevProgress + 0.0222);
+            }
+        }, 1000); // 1000 milliseconds = 1 second
+
+        // Stop increasing progress after 30 seconds
+        setTimeout(() => {
+            clearInterval(intervalId);
+            // Ensure progress is set to 100% if it's not already set
+            if (data) {
+                setProgress(100);
+            }
+        }, 30000); // 30 seconds
+    };
+    const formatText = (progress) => {
+        // Custom logic to format the progress text
+        return `${Math.round(progress * 100)}%`;
+      };
     return (
-        <View >
-            <Verify/>
+        <View>
+            <Button onPress={handlePress} title='Start Progress' />
+            <View style={{marginTop:'20%',alignItems:"center"}}>
+                <Progress.Pie progress={progress} size={150}
+                    color={Colorf.c} borderWidth={5}
+                 />
+            </View>
+            <View style={{marginTop:'20%',alignItems:"center"}}>
+                <Text style={{fontSize:15,margin:'2%'}}>{progress} %</Text>
+                <Progress.Bar progress={0} 
+                    color={Colorf.c} borderWidth={2}
+                 />
+            </View>
+            <View style={{marginTop:'20%',alignItems:"center"}}>
+                <Progress.Circle progress={progress} size={150}
+                    color={Colorf.c} thickness={10} borderWidth={2}
+                    formatText={formatText}
+                    showsText
+                 />
+            </View>
+
+
         </View>
     );
 }

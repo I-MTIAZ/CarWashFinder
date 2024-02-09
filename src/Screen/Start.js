@@ -5,6 +5,7 @@ import { LogBox } from 'react-native';
 import axios from 'axios';
 
 
+
 import { DataBase } from '../Constrains/GoogleApi';
 import { NETINFO } from "./NETINFO"
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -104,11 +105,6 @@ export const Start = (props) => {
     setProgress(0.5);
   }, []);
 
-
-
-  const handlenewplace = () => {
-    props.navigation.navigate('NPLACE')
-  }
   const handleqrcode = () => {
     props.navigation.navigate('QRSCAN', props.route.params)
   }
@@ -125,9 +121,9 @@ export const Start = (props) => {
       <MaterialCommunityIcons
         name="trophy"
         size={height / 20}
-        color={Colorf.c1}
+        color={Colorf.w}
       />
-      <Text style={{ marginLeft: 5, fontWeight: "bold", fontSize: height / 35, color: Colorf.c1 }}>{Math.round(progress * 100)}%</Text>
+      <Text style={{ marginLeft: 5, fontWeight: "bold", fontSize: height / 35, color: Colorf.w }}>{Math.round(progress * 100)}%</Text>
     </View>
   };
   const d = 50
@@ -143,25 +139,25 @@ export const Start = (props) => {
 
             <View style={{
               height: height / 5.8, width: height / 5.8, borderRadius: height / 2.9, borderWidth: 2.5,
-              borderColor: Colorf.c1, alignItems: "center", justifyContent: "center",
+              borderColor: Colorf.w, alignItems: "center", justifyContent: "center",
               marginHorizontal: '5%'
             }}>
               <View style={{ flexDirection: "row", }}>
-                <Text style={{ fontSize: height / 30, fontWeight: "bold", color: Colorf.c1 }}>50</Text>
+                <Text style={{ fontSize: height / 30, fontWeight: "bold", color: Colorf.w }}>50</Text>
                 <MaterialCommunityIcons
                   name="currency-bdt"
                   size={height / 25}
-                  color={Colorf.c1} />
+                  color={Colorf.w} />
               </View>
-              <Text style={{ fontSize: height / 35, fontWeight: "500", color: Colorf.c1 }}>Balance</Text>
+              <Text style={{ fontSize: height / 35, fontWeight: "500", color: Colorf.w }}>Balance</Text>
             </View>
 
             <View style={{ flexDirection: "row", justifyContent: "center", marginHorizontal: '5%' }}>
               <Progress.Circle progress={progress} size={height / 5.8}
-                color={Colorf.c1} thickness={height / 150} borderWidth={2.5}
+                color={Colorf.w} thickness={height / 150} borderWidth={2.5}
                 formatText={formatText}
                 showsText
-                borderColor={Colorf.c1}
+                borderColor={Colorf.w}
               />
 
             </View>
@@ -193,13 +189,6 @@ export const Start = (props) => {
             >
               Go to Map
             </Button>
-
-            <TouchableOpacity onPress={handlenewplace} style={styles.btntou}>
-              <MaterialIcons name="add-location-alt" size={logosize} color={btncolor} />
-              <View style={{ marginLeft: '2%' }}>
-                <Text style={styles.btn_txt}>Add New Parking</Text>
-              </View>
-            </TouchableOpacity>
 
             <TouchableOpacity onPress={handleqrcode} style={styles.btntou}>
               <MaterialCommunityIcons name="qrcode-scan" size={logosize} color={btncolor} />

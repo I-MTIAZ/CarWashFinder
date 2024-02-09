@@ -13,6 +13,7 @@ import { Colorf } from "../Constrains/COLOR";
 import { NETINFO } from "./NETINFO";
 import { saveUserData, getUserData } from '../Helperfuncton/Asstore'
 import { CommonActions } from '@react-navigation/native';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 
 const { height } = Dimensions.get("window");
@@ -167,7 +168,10 @@ export const Welcome = (props) => {
                         </View>
                     </View>
                 ):<View>
-                    <Text>Loading</Text>
+                    <Spinner
+                        visible={true}
+                        textContent={'Loading...'}
+                    />
                 </View>
             }
 
@@ -176,6 +180,8 @@ export const Welcome = (props) => {
     );
 };
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  
+})
 
 

@@ -12,7 +12,7 @@ import { DataBase } from "../Constrains/GoogleApi";
 import { CommonActions } from '@react-navigation/native';
 import axios from 'axios';
 import Spinner from 'react-native-loading-spinner-overlay';
-import { Snackbar, TextInput, Button, Avatar } from 'react-native-paper';
+import { Snackbar, TextInput, Button, } from 'react-native-paper';
 import { Colorf } from '../Constrains/COLOR';
 import PhoneInput from 'react-native-phone-number-input';
 import { isValidUsername, isValidEmail } from '../Helperfuncton/Helperfun'
@@ -37,9 +37,9 @@ export const Registration = (props) => {
   const [verificationCode, setVerificationCode] = useState("");
   const phoneInput = useRef(null);
   const [getOtp, setgetOtp] = useState(0)
-  const [visible, setVisible] = useState(false);
+  
   const [erotilte, seterotitle] = useState("")
-
+  const [visible, setVisible] = useState(false);
   const onToggleSnackBar = () => setVisible(!visible);
   const onDismissSnackBar = () => setVisible(false);
 

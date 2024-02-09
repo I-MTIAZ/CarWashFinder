@@ -12,7 +12,7 @@ import { Snackbar } from 'react-native-paper';
 
 export const Reward = () => {
 
-    /// Data base ///
+    /// Data base //
 
     const [progress, setProgress] = useState(0);
     const [progressNo, setProgressNo] = useState(2);
